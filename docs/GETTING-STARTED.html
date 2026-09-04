@@ -1,0 +1,107 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Getting started — El Descubrimiento de America (Gema/OMK, 1987)</title>
+<style>
+:root{--tinta:#cfd0d4;--suave:#83868f;--fondo:#000;--panel:#0c0e13;--linea:#23262e;
+  --rojo:#ff897d;--cyan:#65dbef;--verde:#3eb849;--oro:#ded087}
+@media (prefers-color-scheme:light){:root{--tinta:#191a1e;--suave:#5a5d66;--fondo:#e9e7e1;
+  --panel:#f7f6f2;--linea:#d0cdc5;--rojo:#b23f34;--cyan:#1c6b7c;--verde:#2b7734;--oro:#8a7420}}
+:root[data-theme="dark"]{--tinta:#cfd0d4;--suave:#83868f;--fondo:#000;--panel:#0c0e13;
+  --linea:#23262e;--rojo:#ff897d;--cyan:#65dbef;--verde:#3eb849;--oro:#ded087}
+:root[data-theme="light"]{--tinta:#191a1e;--suave:#5a5d66;--fondo:#e9e7e1;--panel:#f7f6f2;
+  --linea:#d0cdc5;--rojo:#b23f34;--cyan:#1c6b7c;--verde:#2b7734;--oro:#8a7420}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fondo);color:var(--tinta);padding:0 1.25rem 6rem;
+  font:15px/1.7 ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+.w{max-width:1120px;margin:0 auto}
+.n{max-width:68ch}
+h1,h2,h3,h4{font-weight:400;text-wrap:balance}
+a{color:var(--cyan)}
+img{image-rendering:pixelated;max-width:100%;height:auto;display:block}
+header.top{display:flex;flex-direction:column;align-items:center;gap:1.5rem;
+  padding:4rem 0 2rem;text-align:center}
+header.top img{width:min(100%,642px)}
+.claim{max-width:60ch;color:var(--suave);font-size:1.05rem}
+.claim b{color:var(--tinta);font-weight:400}
+.ficha{display:flex;flex-wrap:wrap;justify-content:center;gap:0 1.5rem;width:100%;
+  font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--suave);
+  border-top:1px solid var(--linea);border-bottom:1px solid var(--linea);padding:.85rem 0}
+.ficha b{color:var(--rojo);font-weight:400}
+nav{display:flex;flex-wrap:wrap;gap:1.25rem;justify-content:center;padding:1.25rem 0;
+  font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+nav a{color:var(--suave);text-decoration:none;border-bottom:1px solid transparent}
+nav a:hover,nav a:focus{color:var(--tinta);border-bottom-color:var(--rojo)}
+nav.docs{border-top:1px solid var(--linea);border-bottom:1px solid var(--linea);
+  margin-bottom:1rem}
+section{margin-top:4.5rem;scroll-margin-top:1rem}
+section>h2{font-size:1rem;letter-spacing:.1em;text-transform:uppercase;
+  border-left:3px solid var(--rojo);padding-left:.9rem;margin:0 0 1.5rem}
+.cifras{display:grid;gap:1px;background:var(--linea);border:1px solid var(--linea);
+  grid-template-columns:repeat(auto-fit,minmax(160px,1fr))}
+.cifra{background:var(--panel);padding:1.1rem}
+.cifra b{display:block;font-size:1.7rem;color:var(--oro);font-weight:400;
+  font-variant-numeric:tabular-nums;line-height:1.2}
+.cifra span{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--suave)}
+.hall{border-top:1px solid var(--linea);padding-top:1.75rem;margin-top:2.5rem}
+.hall:first-of-type{border-top:0;padding-top:0;margin-top:0}
+.hall h3{margin:0 0 .75rem;font-size:1.15rem;color:var(--rojo)}
+.hall h4{color:var(--oro);margin:1.5rem 0 .5rem;font-size:.95rem}
+.hall p{margin:0 0 1rem}
+pre.asm{background:var(--panel);border-left:2px solid var(--verde);margin:1.25rem 0;
+  padding:1rem 1.1rem;overflow-x:auto;font-size:13px;line-height:1.6;color:var(--tinta)}
+.par{display:grid;gap:1.25rem;grid-template-columns:1fr}
+@media(min-width:820px){.par{grid-template-columns:1fr 1fr}}
+.par figure{margin:0}
+table{border-collapse:collapse;width:100%;margin:1.25rem 0;font-size:13px;display:block;
+  overflow-x:auto}
+th,td{text-align:left;padding:.5rem .75rem;border-bottom:1px solid var(--linea)}
+th{color:var(--suave);font-weight:400;font-size:11px;letter-spacing:.07em;text-transform:uppercase}
+td.num{font-variant-numeric:tabular-nums;color:var(--oro)}
+.nivel{margin-top:2rem}
+.nivel h3{margin:0 0 .9rem;font-size:.95rem;letter-spacing:.06em;text-transform:uppercase}
+.nivel em{color:var(--cyan);font-style:normal}
+.sep{color:var(--suave);margin:0 .6rem}
+.rejilla{display:grid;gap:.9rem;grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
+.rejilla figure{margin:0;background:var(--panel);box-shadow:0 0 0 1px var(--linea)}
+.rejilla figcaption{display:flex;justify-content:space-between;padding:.45rem .65rem;
+  font-size:11px;color:var(--suave);border-top:1px solid var(--linea)}
+.dir{font-variant-numeric:tabular-nums;color:var(--verde)}
+footer{margin-top:5rem;padding-top:1.5rem;border-top:1px solid var(--linea);
+  color:var(--suave);font-size:12px}
+
+/* Aviso de trabajo en curso: tiene que verse antes que las cifras, porque un
+   100% mal leido hace mas dano que no ponerlo. */
+.aviso{background:#3a2a10;border-left:3px solid var(--oro);margin:1.5rem auto;
+  padding:1rem 1.2rem;max-width:900px;border-radius:4px}
+.aviso p{margin:0;color:var(--tinta);font-size:15px;line-height:1.65}
+.galeria{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:1.5rem;margin:1.5rem 0}
+.galeria figure{margin:0}
+.galeria img{width:100%;height:auto;image-rendering:pixelated;
+  border:1px solid var(--linea);border-radius:3px}
+.galeria figcaption{color:var(--suave);font-size:13px;margin-top:.5rem}
+audio{display:block;width:100%;max-width:640px;margin:.75rem 0 1.5rem}
+</style>
+<div class="w"><nav class="top"><a href="index.html">Home</a><a href="GETTING-STARTED.html" style=color:var(--tinta)>Start</a><a href="THE-GAME.html">The game</a><a href="THE-CARTRIDGE.html">The tape</a><a href="THE-CODE.html">The code</a><a href="FINDINGS.html">Findings</a><a href="IN-THE-EMULATOR.html">In the emulator</a><a href="OPEN-QUESTIONS.html">Open questions</a><a href="es/EMPEZAR.html" style="margin-left:auto;color:var(--oro)">Castellano</a></nav>
+<h1 id="getting-started">Getting started</h1>
+<p>This repository does not carry the game. It carries the <b>commented disassembly</b> of <em>El Descubrimiento de America</em> (Gema Software / OMK Software, 1987) and the tools that reproduce it.</p>
+<h2 id="what-you-need">What you need</h2>
+<ul><li>The tape, exactly 66,371 bytes, in the root, named <code>descubrimiento.cas</code>. Its sha256 is <code>ac7b780000c2b92f0cbbd89f9ee36e741beb88a41261920680235e84b1c53077</code>.</li><li><code>pasmo</code> on the PATH.</li><li>Python 3.</li><li><code>make</code>.</li></ul>
+<h2 id="the-check-that-decides">The check that decides</h2>
+<pre><code>make                # extract, trace, build, reassemble, verify, test</code></pre>
+<p>It ends with this, and it is the only thing you have to look at:</p>
+<pre><code>OK: la cinta entera se reproduce byte a byte</code></pre>
+<p>It means the <b>five</b> listings in <code>src/</code>, assembled and wrapped back up with the headers and sentinels of the <code>.cas</code> format, give back the same 66,371 bytes. If that fails, nothing else matters.</p>
+<h2 id="why-five-listings">Why five listings</h2>
+<p>Because the tape does not carry one program, it carries <b>two</b>, and both occupy <b>the same addresses</b>. There is no single memory map to disassemble: there are three.</p>
+<table><tr><th>listing</th><th>addresses</th><th>bytes</th><th>what it is</th></tr><tr><td><code>carga</code></td><td>0xC000-0xD3DF</td><td>5,088</td><td>the loader, which survives both programs</td></tr><tr><td><code>p1bajo</code></td><td>0x4000-0x63FF</td><td>9,216</td><td>first half, the program</td></tr><tr><td><code>p1alto</code></td><td>0x8000-0xD2FF</td><td>21,248</td><td>first half, the graphics</td></tr><tr><td><code>p2bajo</code></td><td>0x4000-0x63FF</td><td>9,216</td><td>second half, the program</td></tr><tr><td><code>p2alto</code></td><td>0x8000-0xD2FF</td><td>21,248</td><td>second half, the graphics</td></tr></table>
+<p>The two <code>alto</code> listings do not hold <b>a single instruction</b>: they are data end to end.</p>
+<h2 id="what-each-command-does">What each command does</h2>
+<table><tr><th>command</th><th>what it does</th></tr><tr><td><code>make extract</code></td><td>splits the <code>.cas</code> on the sentinel and pulls out the four files</td></tr><tr><td><code>make cuerpos</code></td><td>builds the 64 KB image as it stands once each half is loaded</td></tr><tr><td><code>make trazado</code></td><td>follows the flow from the entry points in <code>src/*.entries</code></td></tr><tr><td><code>make listados</code></td><td>writes the five <code>.asm</code> files, joining the trace and the notes</td></tr><tr><td><code>make verify</code></td><td>assembles, wraps back up and compares the sha256 with the original</td></tr><tr><td><code>make sanity</code></td><td>what reassembly does NOT cover (see below)</td></tr><tr><td><code>make test</code></td><td>the tests</td></tr><tr><td><code>make densidad</code></td><td>how much of the listings is commented</td></tr><tr><td><code>make sin_leer</code></td><td>the bytes nobody reads, counted from the notes themselves</td></tr><tr><td><code>make imagenes</code></td><td>draws the screens and maps from the tape</td></tr><tr><td><code>make emulador</code></td><td>loads the tape in openMSX and cross-checks RAM and VRAM</td></tr><tr><td><code>make web</code></td><td>generates these pages</td></tr></table>
+<h2 id="why-verify-is-not-enough">Why <code>verify</code> is not enough</h2>
+<p><code>verify</code> proves the bytes come back out, not that they have been <b>understood</b>. A listing where everything was a <code>db</code> would reassemble just as well. So there are four more checks, and all four have to pass:</p>
+<ul><li><b><code>check_entradas</code></b>: no tracer entry point falls inside a range declared as data.</li><li><b><code>check_trace</code></b>: no <code>.nocode</code> region -what the tape never loads- comes back marked as code. Without that barrier a single wrongly deduced destination sends the tracer into a sea of zeros and it &quot;traces&quot; the lot as <code>nop</code>: false coverage.</li><li><b><code>check_datos</code></b>: the <b>103 data regions</b> declared in the <code>.notes</code>, cross-checked one by one against the trace.</li><li><b><code>presupuesto</code></b>: not one byte without an owner. Right now, <b>66,016 of 66,016</b>.</li></ul>
+<p>The 355 bytes between that figure and the tape&#x27;s total are the <code>.cas</code> wrapper: six eight-byte sentinels, two sixteen-byte file headers, the six of the BIN header, the 256 of the BASIC loader, the two sync triplets and the alignment padding. A test checks that split too.</p>
+<h2 id="and-the-check-that-cannot-be-faked">And the check that cannot be faked</h2>
+<p><code>make emulador</code> loads the tape for real in openMSX -a Philips VG-8020, needed because the loader calls the real BIOS TAPION and TAPIN- and dumps RAM and VRAM with the game running. <code>tools/coteja.py</code> compares that with what the listings say. The results are in <a href="IN-THE-EMULATOR.html">In the emulator</a>.</p>
+<footer><p><em>El Descubrimiento de America</em> was published by Gema Software / OMK Software for the MSX in 1987, on tape. All rights in the game remain with their holders. This is preservation, study and documentation work, and the tape image is not distributed.</p></footer></div>

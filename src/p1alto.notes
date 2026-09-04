@@ -1,0 +1,205 @@
+# PRIMERA PARTE, trozo alto: 0x8000-0xD2FF. Todo son datos: aqui no hay una
+# sola instruccion, y el trazador lo confirma (cero bytes de codigo).
+#
+# Los tamanos NO estan puestos a ojo: salen de las tres rutinas de volcado del
+# trozo bajo, que dicen exactamente cuantos bytes consume cada bloque.
+#
+#   vuelca_patrones (0x4497)   BC bytes de patrones
+#   vuelca_comprimido (0x44CB) BC de patrones + BC/8 de color (un byte por
+#                              baldosa, estirado a las ocho filas con FILVRM)
+#   vuelca_con_color (0x446D)  BC de patrones + BC de color: 2*BC en total
+#
+# Encadenando esas cuentas, el final de cada bloque cae EXACTAMENTE en el
+# principio del siguiente, y asi hasta 0xC012. Esa cadena es la comprobacion de
+# que los limites son los buenos y no una suposicion.
+
+B 0x8000 ==========================================================
+B 0x8000  EL DESCUBRIMIENTO DE AMERICA - primera parte, los datos
+B 0x8000 ==========================================================
+B 0x8000 Ocho pantallas con sus patrones, sus colores y su tabla de
+B 0x8000 nombres; los textos de la presentacion; dos melodias; los
+B 0x8000 sprites del protagonista, y la pantalla que queda puesta
+B 0x8000 mientras la cinta carga la segunda parte.
+B 0x8000
+B 0x8000 tools/dibuja.py rehace las ocho pantallas desde estos bytes
+B 0x8000 repitiendo las tres rutinas de volcado, y salen enteras.
+
+D 0x8000 0x80E0 dibujo_rotulo_1  Dibujo de 4 baldosas de ancho por 7 de alto (7 filas de 0x20 bytes), que la rutina de 0x4418 sube a la VRAM 0x10C0 con el color 0x0C. Las medidas salen del parametro 0x0704 que le pasa 0x433A: byte bajo el ancho, byte alto el alto.
+F 0x8000 8
+
+D 0x80E0 0x81C0 dibujo_rotulo_2  Otro dibujo de 4x7 baldosas, a la VRAM 0x0118 con el color 4 (0x42C8).
+F 0x80E0 8
+
+D 0x81C0 0x8200 dibujo_rotulo_3  Dibujo de 2 baldosas de ancho por 4 de alto (parametro 0x0402), a la VRAM 0x0250 con el color 8 (0x42E2).
+F 0x81C0 8
+
+D 0x8200 0x829F texto_presentacion  El texto de la introduccion, en codigo de caracteres del MSX y con los acentos de la pagina de codigos internacional (0xA1 = i acentuada, 0xA2 = o, 0xA4 = n con tilde). La rutina de 0x4395 lo escribe cogiendo los patrones de CGTABL (0x1BBF) y cada linea acaba en 0x0D. Dice: "...ea el puerto de / Palos donde se ar- / men los navios con / todo lo necesario / durante un ano. / Como enviado Real / y Almirante de la / expedicion sera : / CRISTOBAL COLON".
+F 0x8200 32
+
+D 0x829F 0x82C6 partitura_1_canal_a  Partitura del canal A de la melodia de la presentacion. La lee byte a byte el reproductor de 0x4181.
+F 0x829F 16
+
+D 0x82C6 0x82EF partitura_1_canal_b  Partitura del canal B de la misma melodia.
+F 0x82C6 16
+
+D 0x82EF 0x82F5 melodia_presentacion  La entrada de melodia que usa 0x435E: dos punteros (0x829F para el canal A y 0x82C6 para el B) y el 0x0000 que marca el final de la lista.
+F 0x82EF w1
+
+D 0x82F5 0x85F5 pantalla_0_nombres  Tabla de nombres de la pantalla 0, 32x24. Dibujada sale el PUERTO DE PALOS: la fachada de la taberna con su rotulo y su ancla, el muelle de sillares y el agua.
+F 0x82F5 32
+
+D 0x85F5 0x88F5 pantalla_1_nombres  Tabla de nombres de la pantalla 1, 32x24.
+F 0x85F5 32
+
+D 0x88F5 0x8BF5 pantalla_2_nombres  Tabla de nombres de la pantalla 2, 32x24.
+F 0x88F5 32
+
+D 0x8BF5 0x8EF5 pantalla_3_nombres  Tabla de nombres de la pantalla 3, 32x24.
+F 0x8BF5 32
+
+D 0x8EF5 0x91F5 pantalla_4_nombres  Tabla de nombres de la pantalla 4, 32x24.
+F 0x8EF5 32
+
+D 0x91F5 0x94F5 pantalla_5_nombres  Tabla de nombres de la pantalla 5, 32x24. Dibujada sale el interior de la taberna: la barra, las banquetas, las botellas y el cuadro de un navio.
+F 0x91F5 32
+
+D 0x94F5 0x97F5 pantalla_6_nombres  Tabla de nombres de la pantalla 6, 32x24.
+F 0x94F5 32
+
+D 0x97F5 0x9DF5 mapa_ancho  La pantalla 7, que no cabe de una vez: 64 baldosas de ancho por 24 de alto (0x600 bytes). La rutina de 0x4729 recorta 32 columnas empezando por 0xF89D y las sube a la tabla de nombres; el paso entre filas es 0x40, que es lo que dice que el mapa tiene 64 de ancho. 0xF89D va de 0 a 0x20, o sea que el recorrido lateral es de media pantalla.
+F 0x97F5 64
+
+D 0x9DF5 0x9E05 sprite_quieto  Media figura de sprite, 16 bytes: los dos cuadrantes de la izquierda de un patron de 16x16. La rutina de 0x4A82 sube esta mitad a VRAM+0x78 y la otra a VRAM+0x88.
+F 0x9DF5 8
+
+D 0x9E05 0x9E15 sprite_base  La media figura de partida, la que se copia cuando no hay animacion (0x4A8D).
+F 0x9E05 8
+
+D 0x9E15 0x9E55 sprite_pasos  Cuatro medias figuras mas de 16 bytes: los fotogramas del paso. La rutina de 0x4C41 elige con el campo 4 de la ficha del protagonista.
+F 0x9E15 8
+
+D 0x9E55 0xA55D sprites_protagonista  CINCO juegos de sprites de 0x168 bytes, uno por cada valor de 0xF89C -el disfraz o el estado del protagonista-. El indice lo aplica la rutina de 0x52B4 con `de = 0x168`, y cinco pasos desde 0x9E55 caen justo en 0xA55D, que es donde empieza el bloque siguiente.
+F 0x9E55 8
+
+D 0xA55D 0xA5AD sprite_grande  0x50 bytes que 0x58C3 sube de golpe a la VRAM 0x3850.
+F 0xA55D 8
+
+D 0xA5AD 0xA5DD sprite_mar_1  0x30 bytes a la VRAM 0x38A0. Los elige la rutina de 0x5A3C segun por donde vaya el barco en el mapa.
+F 0xA5AD 8
+
+D 0xA5DD 0xA60D sprite_mar_2  0x30 bytes, la variante siguiente (0x5A5E).
+F 0xA5DD 8
+
+D 0xA60D 0xA63D sprite_mar_3  0x30 bytes (0x5A25 y 0x59B6).
+F 0xA60D 8
+
+D 0xA63D 0xA66D sprite_mar_4  0x30 bytes (0xA63D, la ultima que nombra el codigo, en 0x5A6C).
+F 0xA63D 8
+
+D 0xA66D 0xAAFD hueco_sprites  0x490 bytes que ninguna instruccion lee. Los 0x53 primeros siguen siendo dibujo -dos bloques mas de la serie de 0x30, el segundo cortado- y de 0xA6C0 en adelante son 1085 ceros seguidos, sin una sola excepcion.
+F 0xA66D 16
+
+D 0xAAFD 0xAB60 fichas_de_objeto  Nueve fichas de once bytes: 0xAAFD, 0xAB08, 0xAB13, 0xAB1E, 0xAB29, 0xAB34, 0xAB3F, 0xAB4A y 0xAB55, y la novena acaba justo en 0xAB60. El bucle de 0x422C rellena las cuatro primeras con dos bytes sacados de 0xC610 y deja un 3 en el tercer byte de cada una; ese 3 esta puesto tambien en las cinco de atras. Los campos que usa el codigo (rutina de 0x4C1F, que indexa con A-1): 1 = X, 2 = Y, 3 = estado, 4 = fotograma, 5 = parpadeo.
+F 0xAAFD 11
+
+D 0xAB60 0xAE54 patrones_comunes  Los patrones que llevan todas las pantallas: 0x2A0 bytes de dibujo y detras 0x54 de color, uno por baldosa. Los sube la rutina de 0x46FC a la VRAM 0x0000. La cuenta 0x2A0 + 0x2A0/8 = 0x2F4 cae exactamente en 0xAE54.
+F 0xAB60 8
+
+D 0xAE54 0xAED4 colores_comunes  0x40 bytes de patrones y 0x40 de colores a la VRAM 0x298, con la tabla de color completa (0x470B).
+F 0xAE54 8
+
+D 0xAED4 0xB0CC pantalla_0_patrones  Los patrones propios de la pantalla 0: 0x1C0 de dibujo y 0x38 de color por baldosa, a la VRAM 0x2D8 (0x4630).
+F 0xAED4 8
+
+D 0xB0CC 0xB10C pantalla_0_colores  0x20 de patrones y 0x20 de colores a la VRAM 0x498 (0x463F).
+F 0xB0CC 8
+
+D 0xB10C 0xB2B3 pantalla_1_patrones  0x178 de dibujo y 0x2F de color, a la VRAM 0x2D8 (0x464E).
+F 0xB10C 8
+
+D 0xB2B3 0xB333 pantalla_1_colores  0x40 y 0x40 a la VRAM 0x450 (0x465D).
+F 0xB2B3 8
+
+D 0xB333 0xB49B pantalla_2_patrones  0x140 de dibujo y 0x28 de color, a la VRAM 0x2D8 (0x4669).
+F 0xB333 8
+
+D 0xB49B 0xB57B pantalla_2_colores  0x70 y 0x70 a la VRAM 0x418 (0x4678).
+F 0xB49B 8
+
+D 0xB57B 0xB74F pantalla_3_patrones  0x1A0 de dibujo y 0x34 de color, a la VRAM 0x2D8 (0x4684).
+F 0xB57B 8
+
+D 0xB74F 0xB81F pantalla_3_colores  0x68 y 0x68 a la VRAM 0x478 (0x4693).
+F 0xB74F 8
+
+D 0xB81F 0xB9FC pantalla_4_patrones  0x1A8 de dibujo y 0x35 de color, a la VRAM 0x2D8 (0x469F).
+F 0xB81F 8
+
+D 0xB9FC 0xBB3C pantalla_4_colores  0xA0 y 0xA0 a la VRAM 0x480 (0x46AE).
+F 0xB9FC 8
+
+D 0xBB3C 0xBC53 pantalla_5_patrones  0xF8 de dibujo y 0x1F de color, a la VRAM 0x2D8 (0x46BA). Esta pantalla no lleva bloque de colores aparte.
+F 0xBB3C 8
+
+D 0xBC53 0xBD07 pantalla_6_patrones  0xA0 de dibujo y 0x14 de color, a la VRAM 0x2D8 (0x46C9).
+F 0xBC53 8
+
+D 0xBD07 0xBDB7 pantalla_6_colores  0x58 y 0x58 a la VRAM 0x378 (0x46D8).
+F 0xBD07 8
+
+D 0xBDB7 0xBF82 pantalla_7_patrones  0x198 de dibujo y 0x33 de color, a la VRAM 0x2D8. Se cargan dos veces: en 0x46E7, al entrar en la pantalla 7, y otra vez en 0x5C65 para la pantalla de espera del final.
+F 0xBDB7 8
+
+D 0xBF82 0xC012 pantalla_7_colores  0x48 y 0x48 a la VRAM 0x470 (0x46F0 y 0x5C71).
+F 0xBF82 8
+
+D 0xC012 0xC102 marcador_tres_estados  Tres bloques de 0x50 bytes. El bucle de 0x5249 elige uno con `de = 0x50` y lo sube a la VRAM 0x0E40: es el indicador que va cambiando en la pantalla 3.
+F 0xC012 16
+
+D 0xC102 0xC172 patrones_volteables  0x38 bytes de patrones y 0x38 de colores a la VRAM 0x7C8 (0x5300). Son los unicos patrones del juego que el programa da la vuelta EN MEMORIA: la rutina de 0x561D invierte el orden de los bits de cada byte entre 0xC102 y 0xC138. El byte 0xC103 hace de marcador para no voltearlos dos veces; el arranque lo mira en 0x420A y solo voltea si NO vale 8.
+F 0xC102 8
+
+D 0xC172 0xC1C2 letrero_1  0x28 de patrones y 0x28 de colores a la VRAM 0x7A0 (0x5601).
+F 0xC172 8
+
+D 0xC1C2 0xC262 letrero_2  0x50 de patrones y 0x50 de colores a la VRAM 0x778 (0x565A).
+F 0xC1C2 8
+
+D 0xC262 0xC26A baldosa_suelta_1  Ocho bytes a la VRAM 0x2FC8, o sea la tabla de COLORES de una baldosa (0x581E).
+F 0xC262 8
+
+D 0xC26A 0xC272 baldosa_suelta_2  Ocho bytes a la VRAM 0x37D0 (0x582A).
+F 0xC26A 8
+
+D 0xC272 0xC28A remate_de_letrero  0x18 bytes pegados al bloque anterior que ninguna instruccion nombra por su direccion.
+F 0xC272 8
+
+D 0xC28A 0xC310 textos_de_pantalla  Once cadenas terminadas en 0x0D que la rutina de 0x5ADA escribe en la franja de abajo, cogiendo los patrones de CGTABL: "PUERTO DE PALOS", "Ano 1492", "Fray Juan Perez", "Juan de la Cosa", "Cartografo", "Martin Alonso Pinzon", "Armador", "Piloto", "Cocinero", "Carpintero", "Marinero", y una vacia al final.
+F 0xC28A 32
+
+D 0xC310 0xC610 pantalla_de_espera  Tabla de nombres 32x24 que 0x5C59 deja puesta mientras la cinta carga la segunda parte.
+F 0xC310 32
+
+D 0xC610 0xC618 semillas_de_objeto  Ocho bytes: las coordenadas de partida de las cuatro primeras fichas de objeto, dos por ficha, que el bucle de 0x422C copia a 0xAAFD.
+F 0xC610 2
+
+D 0xC618 0xC792 dibujo_final  0x150 de patrones y 0x2A de color a la VRAM 0x650 (0x5CDF), lo ultimo que se pinta antes de ir a por la segunda parte.
+F 0xC618 8
+
+D 0xC792 0xC852 dibujo_pantalla_2  0x60 de patrones y 0x60 de colores a la VRAM 0x638 (0x5E10).
+F 0xC792 8
+
+D 0xC852 0xCB95 partituras  Las partituras de las dieciseis melodias que indexa la lista de 0xCB95. El primer puntero de esa lista es 0xC852 y el ultimo 0xCB5C, asi que el bloque va de una a otra.
+F 0xC852 16
+
+D 0xCB95 0xCBD7 lista_de_melodias  Dieciseis entradas de cuatro bytes -puntero del canal A y puntero del canal B- y un 0x0000 al final que marca el fin de la lista. La rutina de 0x41D6 lee cuatro bytes por entrada y la de 0x41ED comprueba el terminador; dieciseis pasos de cuatro desde 0xCB95 caen justo en el 0x0000 de 0xCBD5.
+F 0xCB95 w2
+
+D 0xCBD7 0xCC56 mapa_ancho_original  Los 0x7F bytes que el arranque copia en 0x97F5 (bucle de 0x4259, que para cuando el destino llega a 0x9874): la esquina de arriba a la izquierda del mapa ancho, tal como estaba antes de que la partida anterior la tocara.
+F 0xCBD7 16
+
+D 0xCC56 0xD000 cola_colores_pantalla_carga  0x3AA bytes: un 0x19 y 937 veces el valor 0x1F, sin nada mas (medido). Ninguna instruccion los lee, pero no son relleno: son la COLA DE LA TABLA DE COLORES de la pantalla de carga, que el fichero CARGA trae en 0xC800-0xCFFF y que sigue puesta aqui. Medido junto con el bloque siguiente: de 0xCC56 a 0xD2FF los 1706 bytes coinciden con el cargador uno a uno salvo el propio 0xCC56, que alli vale 0x1F y aqui 0x19. El 0x1F es tinta negra sobre fondo blanco, que es como se ve esa pantalla.
+F 0xCC56 16
+
+D 0xD000 0xD300 copia_pantalla_carga  0x300 bytes que son BYTE A BYTE la misma tabla de nombres que trae el fichero CARGA en 0xD000 (comprobado: cero diferencias). No es un bloque suelto: junto con la zona anterior son 1706 bytes seguidos, de 0xCC56 a 0xD2FF, identicos al cargador salvo un byte. Lo que quedo grabado aqui es la memoria que el cargador dejo puesta, y no lo usa nadie: la unica rutina que volcaria esta tabla es la de 0xD330, y esa solo corre cuando se entra por 0xD302, cosa que ya paso antes de que este bloque existiera. La segunda parte, en cambio, trae ahi otra cosa: en las mismas direcciones solo coincide el 4,1 % de los bytes.
+F 0xD000 32

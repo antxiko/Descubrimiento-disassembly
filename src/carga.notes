@@ -1,0 +1,66 @@
+# Notas del fichero BIN 'CARGA' de la cinta: 0xC000-0xD3DF, arranca en 0xD302.
+#
+# Formato de las directivas, en tools/mkasm.py:
+#   L dir nombre  comentario     etiqueta
+#   C dir comentario             comentario al final de la linea
+#   B dir texto                  cabecera antes de esa direccion
+#   D ini fin nombre  texto      rango de datos, extremo derecho EXCLUSIVO
+#   F dir anchura                bytes (o wN palabras) por linea del volcado
+
+B 0xC000 ==========================================================
+B 0xC000  EL DESCUBRIMIENTO DE AMERICA - el cargador de la cinta
+B 0xC000 ==========================================================
+B 0xC000 Este es el unico fichero de la cinta que tiene cabecera de
+B 0xC000 verdad: un BIN de 0xC000 a 0xD3DF que arranca en 0xD302, y
+B 0xC000 que la ROM del BASIC carga con el BLOAD "CAS:",R de la
+B 0xC000 linea de BASIC que va delante en la cinta.
+B 0xC000
+B 0xC000 Trae tres cosas: la fuente de la pantalla de carga, la
+B 0xC000 propia pantalla ya montada, y las cuatro rutinas que
+B 0xC000 encienden el motor y se leen a mano los dos bloques SIN
+B 0xC000 cabecera que vienen detras.
+B 0xC000
+B 0xC000 Sobrevive a los dos programas: ninguno de los dos bloques
+B 0xC000 llega mas alla de 0xD2FF, asi que 0xD300-0xD3DF sigue en pie
+B 0xC000 cuando la primera parte termina y salta otra vez aqui a por
+B 0xC000 la segunda.
+
+D 0xC000 0xC800 fuente_patrones  Tabla de patrones de la pantalla de carga: 256 baldosas de 8 filas. El cargador la vuelca TRES veces (0xD312-0xD320), una por tercio de la pantalla, asi que las 24 filas comparten el mismo juego de baldosas.
+F 0xC000 8
+
+D 0xC800 0xD000 fuente_colores  Tabla de colores paralela a la anterior: un byte por FILA de baldosa, nibble alto = tinta y nibble bajo = fondo. Tambien se vuelca tres veces (0xD321-0xD330).
+F 0xC800 8
+
+D 0xD000 0xD300 pantalla_carga  Tabla de nombres de la pantalla de carga, 32 columnas x 24 filas. Dibujada con tools/dibuja.py sale el rotulo "El Descubrimiento De America", el aviso "Realizando Grabacion", la linea "Todos los derechos Reservados." y, en vertical por el margen derecho, "OMIKRON Softwarwe" -con la errata tal cual, dos w-.
+F 0xD000 32
+
+D 0xD300 0xD302 salto_de_recarga  NO es codigo, aunque este pegado al codigo: es la palabra 0xD369, la direccion del bucle que lee un bloque de la cinta. La primera parte del juego termina con `ld hl,(0xD300) / push hl / ret` (0x5CC2) y por eso vuelve aqui a cargar la segunda. Es tambien la razon de que el fichero arranque en 0xD302 y no en 0xD300.
+F 0xD300 w1
+
+L 0xD302 arranque  Punto de entrada del BIN, el que declara la cabecera de la cinta
+C 0xD302 tinta, fondo y borde en 7 (cyan): el fondo de la pantalla de carga
+C 0xD30D SCREEN 2
+C 0xD312 la fuente, a la tabla de patrones de los tres tercios
+C 0xD321 los colores de la fuente, a la tabla de colores de los tres tercios
+C 0xD330 la pantalla ya montada, a la tabla de nombres
+C 0xD33C la pila, justo debajo de donde va a caer el segundo trozo
+C 0xD33F busca RAM en la pagina 1: prueba el slot con el bit 2 puesto...
+C 0xD346 ...escribiendo 0xBAC5 en 0x4000 y volviendo a leerlo
+C 0xD354 si no, prueba con el bit 3; si tampoco, deja el slot como estaba
+L 0xD369 lee_bloque  Lee un bloque SIN cabecera de la cinta y salta a su codigo
+C 0xD369 TAPION: motor en marcha y sincronia de bits
+C 0xD36C espera la marca de arranque del bloque: los bytes 3, 2 y 1
+C 0xD384 primer trozo: 0x2400 bytes a 0x4000-0x63FF
+C 0xD397 segundo trozo: 0x5300 bytes a 0x8000-0xD2FF (justo hasta debajo de aqui)
+C 0xD3AA TAPIOF: para el motor
+C 0xD3AD la palabra que el bloque trae en 0x4002 es su punto de entrada
+L 0xD3B2 vuelca_tres_tercios  Vuelca 0x800 bytes a los tres tercios de la pantalla
+L 0xD3BE vuelca_800  LDIRVM de 0x800 bytes de (0xD3D4) a (0xD3D6)
+L 0xD3CB siguiente_tercio  Suma 0x800 al destino en VRAM, sin tocar el origen
+C 0xD3CB por eso los tres tercios salen con la MISMA fuente
+
+D 0xD3D4 0xD3D8 var_volcado  Los dos punteros del volcador: 0xD3D4 el origen en RAM y 0xD3D6 el destino en VRAM (0xD3D7 es su byte alto, el que suma 8 la rutina de 0xD3CB).
+F 0xD3D4 w1
+
+D 0xD3D8 0xD3E0 resto_de_montaje  Ocho bytes que no ejecuta nadie: son copia exacta de 0xD358-0xD35F (comprobado byte a byte), la cola del bloque repetida al montar el fichero. El mismo artefacto aparece al final de los dos programas del juego.
+F 0xD3D8 8

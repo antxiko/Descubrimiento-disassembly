@@ -1,0 +1,112 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Preguntas abiertas — El Descubrimiento de America (Gema/OMK, 1987)</title>
+<style>
+:root{--tinta:#cfd0d4;--suave:#83868f;--fondo:#000;--panel:#0c0e13;--linea:#23262e;
+  --rojo:#ff897d;--cyan:#65dbef;--verde:#3eb849;--oro:#ded087}
+@media (prefers-color-scheme:light){:root{--tinta:#191a1e;--suave:#5a5d66;--fondo:#e9e7e1;
+  --panel:#f7f6f2;--linea:#d0cdc5;--rojo:#b23f34;--cyan:#1c6b7c;--verde:#2b7734;--oro:#8a7420}}
+:root[data-theme="dark"]{--tinta:#cfd0d4;--suave:#83868f;--fondo:#000;--panel:#0c0e13;
+  --linea:#23262e;--rojo:#ff897d;--cyan:#65dbef;--verde:#3eb849;--oro:#ded087}
+:root[data-theme="light"]{--tinta:#191a1e;--suave:#5a5d66;--fondo:#e9e7e1;--panel:#f7f6f2;
+  --linea:#d0cdc5;--rojo:#b23f34;--cyan:#1c6b7c;--verde:#2b7734;--oro:#8a7420}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fondo);color:var(--tinta);padding:0 1.25rem 6rem;
+  font:15px/1.7 ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+.w{max-width:1120px;margin:0 auto}
+.n{max-width:68ch}
+h1,h2,h3,h4{font-weight:400;text-wrap:balance}
+a{color:var(--cyan)}
+img{image-rendering:pixelated;max-width:100%;height:auto;display:block}
+header.top{display:flex;flex-direction:column;align-items:center;gap:1.5rem;
+  padding:4rem 0 2rem;text-align:center}
+header.top img{width:min(100%,642px)}
+.claim{max-width:60ch;color:var(--suave);font-size:1.05rem}
+.claim b{color:var(--tinta);font-weight:400}
+.ficha{display:flex;flex-wrap:wrap;justify-content:center;gap:0 1.5rem;width:100%;
+  font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--suave);
+  border-top:1px solid var(--linea);border-bottom:1px solid var(--linea);padding:.85rem 0}
+.ficha b{color:var(--rojo);font-weight:400}
+nav{display:flex;flex-wrap:wrap;gap:1.25rem;justify-content:center;padding:1.25rem 0;
+  font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+nav a{color:var(--suave);text-decoration:none;border-bottom:1px solid transparent}
+nav a:hover,nav a:focus{color:var(--tinta);border-bottom-color:var(--rojo)}
+nav.docs{border-top:1px solid var(--linea);border-bottom:1px solid var(--linea);
+  margin-bottom:1rem}
+section{margin-top:4.5rem;scroll-margin-top:1rem}
+section>h2{font-size:1rem;letter-spacing:.1em;text-transform:uppercase;
+  border-left:3px solid var(--rojo);padding-left:.9rem;margin:0 0 1.5rem}
+.cifras{display:grid;gap:1px;background:var(--linea);border:1px solid var(--linea);
+  grid-template-columns:repeat(auto-fit,minmax(160px,1fr))}
+.cifra{background:var(--panel);padding:1.1rem}
+.cifra b{display:block;font-size:1.7rem;color:var(--oro);font-weight:400;
+  font-variant-numeric:tabular-nums;line-height:1.2}
+.cifra span{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--suave)}
+.hall{border-top:1px solid var(--linea);padding-top:1.75rem;margin-top:2.5rem}
+.hall:first-of-type{border-top:0;padding-top:0;margin-top:0}
+.hall h3{margin:0 0 .75rem;font-size:1.15rem;color:var(--rojo)}
+.hall h4{color:var(--oro);margin:1.5rem 0 .5rem;font-size:.95rem}
+.hall p{margin:0 0 1rem}
+pre.asm{background:var(--panel);border-left:2px solid var(--verde);margin:1.25rem 0;
+  padding:1rem 1.1rem;overflow-x:auto;font-size:13px;line-height:1.6;color:var(--tinta)}
+.par{display:grid;gap:1.25rem;grid-template-columns:1fr}
+@media(min-width:820px){.par{grid-template-columns:1fr 1fr}}
+.par figure{margin:0}
+table{border-collapse:collapse;width:100%;margin:1.25rem 0;font-size:13px;display:block;
+  overflow-x:auto}
+th,td{text-align:left;padding:.5rem .75rem;border-bottom:1px solid var(--linea)}
+th{color:var(--suave);font-weight:400;font-size:11px;letter-spacing:.07em;text-transform:uppercase}
+td.num{font-variant-numeric:tabular-nums;color:var(--oro)}
+.nivel{margin-top:2rem}
+.nivel h3{margin:0 0 .9rem;font-size:.95rem;letter-spacing:.06em;text-transform:uppercase}
+.nivel em{color:var(--cyan);font-style:normal}
+.sep{color:var(--suave);margin:0 .6rem}
+.rejilla{display:grid;gap:.9rem;grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
+.rejilla figure{margin:0;background:var(--panel);box-shadow:0 0 0 1px var(--linea)}
+.rejilla figcaption{display:flex;justify-content:space-between;padding:.45rem .65rem;
+  font-size:11px;color:var(--suave);border-top:1px solid var(--linea)}
+.dir{font-variant-numeric:tabular-nums;color:var(--verde)}
+footer{margin-top:5rem;padding-top:1.5rem;border-top:1px solid var(--linea);
+  color:var(--suave);font-size:12px}
+
+/* Aviso de trabajo en curso: tiene que verse antes que las cifras, porque un
+   100% mal leido hace mas dano que no ponerlo. */
+.aviso{background:#3a2a10;border-left:3px solid var(--oro);margin:1.5rem auto;
+  padding:1rem 1.2rem;max-width:900px;border-radius:4px}
+.aviso p{margin:0;color:var(--tinta);font-size:15px;line-height:1.65}
+.galeria{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:1.5rem;margin:1.5rem 0}
+.galeria figure{margin:0}
+.galeria img{width:100%;height:auto;image-rendering:pixelated;
+  border:1px solid var(--linea);border-radius:3px}
+.galeria figcaption{color:var(--suave);font-size:13px;margin-top:.5rem}
+audio{display:block;width:100%;max-width:640px;margin:.75rem 0 1.5rem}
+</style>
+<div class="w"><nav class="top"><a href="index.html">Portada</a><a href="EMPEZAR.html">Empezar</a><a href="EL-JUEGO.html">El juego</a><a href="EL-CARTUCHO.html">La cinta</a><a href="EL-CODIGO.html">El código</a><a href="HALLAZGOS.html">Hallazgos</a><a href="EN-EL-EMULADOR.html">En el emulador</a><a href="PREGUNTAS-ABIERTAS.html" style=color:var(--tinta)>Preguntas abiertas</a><a href="../OPEN-QUESTIONS.html" style="margin-left:auto;color:var(--oro)">English</a></nav>
+<h1 id="preguntas-abiertas">Preguntas abiertas</h1>
+<p>Cada byte de la cinta esta asignado y cada rutina tiene nombre, pero eso no quiere decir que se sepa todo. Lo que queda abierto se dice aqui, con la medida que hay hecha y la que falta.</p>
+<h2 id="1-que-son-los-rellenos-de-cola">1. Que son los rellenos de cola</h2>
+<p>Son tres, <b>4.534 bytes en total</b>, y ninguna instruccion los lee:</p>
+<table><tr><th>listado</th><th>rango</th><th>bytes</th></tr><tr><td><code>p1bajo</code></td><td>0x5FF8-0x63FF</td><td>1.032</td></tr><tr><td><code>p2bajo</code></td><td>0x5C7A-0x63FF</td><td>1.926</td></tr><tr><td><code>p2alto</code></td><td>0xCCD8-0xD2FF</td><td>1.576</td></tr></table>
+<h3 id="lo-que-si-se-sabe">Lo que si se sabe</h3>
+<p><b>La de la primera parte esta vacia.</b> Repite <code>00 FF FF FF FF 00 00 00</code> desde 0x5FF9 sin una sola excepcion, y la autocorrelacion da el 100 % en todos los multiplos de 8. No lleva ni un bit de informacion.</p>
+<p><b>Las dos de la segunda parte no.</b> Tienen 39 y 13 valores distintos, y una estructura clara: registros de ocho bytes en los que <b>cuatro acaban en <code>F</code> y cuatro en <code>0</code></b>.</p>
+<h3 id="lo-que-se-ha-descartado-y-con-que-medida">Lo que se ha descartado, y con que medida</h3>
+<p><b>No es una tabla de colores de SCREEN 2</b>, aunque lo parezca. Dos medidas lo tumban:</p>
+<ul><li>El nibble bajo es 0 o F en el <b>100 %</b> de los bytes; en las tablas de color de este mismo juego eso pasa entre el 0 % y el 36,5 % de las veces (<code>colores_comunes</code> 12,5, <code>pantalla_1_colores</code> 0,0, <code>pantalla_4_colores</code> 4,4, <code>fuente_barco_colores</code> 6,3, <code>pantalla_3_colores</code> 36,5). La unica tabla de la cinta con esta forma es la de la pantalla de carga, que es tinta sobre blanco y da el 98,4 %.</li><li>Y sobre todo, <b>la fase</b>. Barriendo los ocho desplazamientos posibles, la regla de los cuatro y cuatro se cumple al 100 % empezando en 0x5C7A, 0xCCDA y 0x5FFA, y solo al 50 % en las direcciones 8-alineadas. Los registros caen, en las tres colas, en direcciones con <b>resto 2 al dividir por 8</b>. Una tabla de colores de SCREEN 2 esta alineada a 8 por construccion, base + baldosa*8.</li></ul>
+<p><b>No es un dibujo</b>: dibujadas a anchura 32, 40, 48 y 64 solo salen franjas verticales, que es lo que produce una estructura de ocho sin nada en dos dimensiones.</p>
+<p><b>No es copia de nada de la cinta</b>: buscando ventanas de 24 bytes en los cinco listados, la cola de <code>p2bajo</code> no aparece fuera de si misma.</p>
+<p><b>No estaba en pantalla</b>: contra los dos volcados de VRAM de openMSX, 16 KB cada uno, no hay <b>una sola coincidencia de 32 bytes</b>.</p>
+<p><b>No es la memoria que dejo la primera parte</b> en esas direcciones: coincide el 27,5 % y el 4,1 % de los bytes, contra un fondo de coincidencia entre los dos programas del 2,3 %.</p>
+<h3 id="lo-que-queda">Lo que queda</h3>
+<p>Que la fase sea <b>la misma en las tres colas</b>, viviendo en zonas de memoria sin relacion entre si, dice que las tres salen del mismo sitio y que no es casualidad. La pista viva es ese desfase de dos bytes: apunta a registros de ocho con dos bytes de cabecera delante, o a un buffer que empieza dos bytes dentro. Que sea exactamente, no se sabe.</p>
+<h2 id="2-los-sprites-que-no-nombra-nadie">2. Los sprites que no nombra nadie</h2>
+<p>De 0xA66D a 0xA6BF de la primera parte hay 0x53 bytes que <b>siguen siendo dibujo de sprite</b> -dos bloques mas de la serie de 0x30 que usa la rutina de 0x59FB, el segundo cortado a mitad-, pero que no nombra ninguna instruccion. De 0xA6C0 a 0xAAFC son 1.085 ceros seguidos, sin una sola excepcion.</p>
+<p>Puede ser una animacion que se quito, o simplemente sitio reservado. No hay forma de decidirlo desde el binario.</p>
+<h2 id="3-no-se-ha-jugado-una-partida-completa">3. No se ha jugado una partida completa</h2>
+<p>El juego se ha cargado y arrancado en openMSX, y se ha llegado a la segunda parte forzando el salto a (0xD300), pero <b>no se ha jugado de principio a fin</b>.</p>
+<p>Lo que eso significa: los nombres de las pantallas salen de mirar los dibujos, y las mecanicas -que hace cada objeto, como se avanza de pantalla, que cuenta cada contratiempo- salen de leer el codigo. Una partida de verdad seguramente corregiria alguna.</p>
+<h2 id="4-quien-lo-programo">4. Quien lo programo</h2>
+<p>En las cinco piezas de la cinta <b>no hay ni un credito ni unas iniciales</b> en ASCII. Los unicos textos son la presentacion, once rotulos de pantalla y cinco mensajes de desastre. El unico nombre que aparece es el de la casa, y va dibujado en baldosas, no escrito: <b>OMIKRON Softwarwe</b>, con la errata.</p>
+<p>Si alguien sabe quien firmo este juego, interesa.</p>
+<footer><p><em>El Descubrimiento de America</em> lo publico Gema Software / OMK Software para MSX en 1987, en cinta. Todos los derechos sobre el juego siguen siendo de sus titulares. Este trabajo es de preservacion, estudio y documentacion, y la imagen de la cinta no se distribuye.</p></footer></div>

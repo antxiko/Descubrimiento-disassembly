@@ -1,0 +1,1201 @@
+# PRIMERA PARTE, trozo bajo: 0x4000-0x63FF. Aqui vive todo el programa.
+#
+# Formato de las directivas, en tools/mkasm.py:
+#   L dir nombre  comentario     etiqueta
+#   C dir comentario             comentario al final de la linea
+#   B dir texto                  cabecera antes de esa direccion
+#   D ini fin nombre  texto      rango de datos, extremo derecho EXCLUSIVO
+#   F dir anchura                bytes (o wN palabras) por linea del volcado
+
+B 0x4000 ==========================================================
+B 0x4000  EL DESCUBRIMIENTO DE AMERICA - primera parte, el programa
+B 0x4000 ==========================================================
+B 0x4000 La cinta trae este bloque SIN cabecera: no lo lee la BIOS,
+B 0x4000 lo lee a mano el cargador de 0xD369, y lo reparte en dos
+B 0x4000 trozos: 0x2400 bytes aqui, a 0x4000, y 0x5300 bytes a
+B 0x4000 0x8000. Este es el bajo, y es codigo casi de punta a punta.
+B 0x4000
+B 0x4000 La primera parte son OCHO pantallas por las que hay que
+B 0x4000 pasar antes de zarpar: el puerto de Palos, la taberna, el
+B 0x4000 astillero, el monasterio, la corte... La variable que manda
+B 0x4000 es 0xF893, el numero de pantalla, y la rutina que carga cada
+B 0x4000 una es la de 0x4604.
+B 0x4000
+B 0x4000 Al terminar, en 0x5CC2, salta a (0xD300) -o sea a 0xD369- y
+B 0x4000 el cargador se lee de la cinta la segunda parte.
+
+D 0x4000 0x4002 firma  Los caracteres 'A' y 'B'. Ninguna instruccion los lee; la unica pista de que son firma y no basura es que los DOS bloques sin cabecera de la cinta empiezan igual.
+F 0x4000 2
+
+D 0x4002 0x4004 punto_de_entrada  La palabra 0x4202: el cargador la lee en 0xD3AD con `ld hl,(0x4002)` y salta ahi metiendola en la pila. En la segunda parte esta misma palabra vale 0x401F.
+F 0x4002 w1
+
+D 0x4004 0x4010 hueco_de_cabecera  Doce ceros entre la cabecera y el codigo. No los toca nadie.
+F 0x4004 12
+
+B 0x4010 --- rutina de servicio: la VRAM entera de una vez -------
+B 0x4010 Apaga la pantalla y vuelca 16 KB de 0x8000 a la VRAM
+B 0x4010 completa. En este bloque no la llama nadie; aparece igual,
+B 0x4010 byte a byte, al principio de la segunda parte.
+L 0x4010 vuelca_vram_entera  Apaga la pantalla y copia 0x8000-0xBFFF a la VRAM
+C 0x4010 DISSCR
+C 0x401C LDIRVM: 0x4000 bytes a partir de la direccion 0 de VRAM
+
+B 0x401F ==========================================================
+B 0x401F  EL REPRODUCTOR DE MUSICA
+B 0x401F ==========================================================
+B 0x401F Suena colgado de H.KEYI (0xFD9F), el gancho que la BIOS
+B 0x401F ejecuta en cada interrupcion de barrido antes de leer el
+B 0x401F teclado: cincuenta veces por segundo en una maquina europea.
+B 0x401F
+B 0x401F El estado son catorce bytes seguidos, de 0xF8CB a 0xF8D8:
+B 0x401F
+B 0x401F   0xF8CB  contador de compas (cuenta hasta 6)
+B 0x401F   0xF8CC  peticion de silencio (8 y 9 mientras se apaga)
+B 0x401F   0xF8CD  marca de "el canal A se ha quedado sin partitura"
+B 0x401F   0xF8CE  canal A: puntero de partitura (2 bytes) y duracion
+B 0x401F   0xF8D1  canal B: lo mismo
+B 0x401F   0xF8D4  canal C: lo mismo
+B 0x401F   0xF8D7  puntero a la entrada de melodia que se esta tocando
+B 0x401F   0xF8D9  cursor con el que se recorren los tres canales
+B 0x401F
+B 0x401F Cada canal son TRES bytes -puntero de dos y duracion de uno-,
+B 0x401F y por eso el cursor de 0x4181 avanza de tres en tres: la
+B 0x401F misma rutina sirve para los tres canales sin una sola tabla.
+L 0x401F inicia_musica  Borra el estado del reproductor y engancha la interrupcion
+C 0x401F HL: primer byte del estado del reproductor
+C 0x4022 DE: el ultimo, para el DCOMPR del bucle
+C 0x4025 --- borra de 0xF8CB a 0xF8D8, catorce bytes ---
+C 0x4028 DCOMPR compara HL con DE
+C 0x402C 0x0B es el silencio en este reproductor...
+C 0x402E ...y se le pone a los tres canales de golpe
+C 0x4037 el gancho se toca con las interrupciones cerradas
+C 0x4038 H.KEYI, el gancho de teclado de la BIOS...
+C 0x403B ...pasa a ser un JP...
+C 0x403E ...al reproductor de aqui abajo
+C 0x4041 los dos bytes de detras del 0xC3 son el destino del salto
+C 0x4044 y ya puede sonar
+
+B 0x4046 --- lo que suena en cada interrupcion --------------------
+L 0x4046 suena  Manejador de H.KEYI: una nota de cada canal por interrupcion
+C 0x4046 la BIOS entra aqui con las interrupciones abiertas
+C 0x4047 el gancho es codigo de sistema: hay que devolver los registros intactos
+C 0x404B 0xF8CC: si vale 8 o mas, alguien ha mandado callar la musica
+C 0x4051 mientras valga menos de 8, a tocar
+C 0x4054 al mandar callar se cuenta 8, 9 y vuelta a 0
+C 0x4057 en la decima vuelta se cierra el ciclo
+C 0x405F GICINI deja el PSG mudo y las tablas del PLAY como estaban
+C 0x4063 --- salida comun: los registros como estaban ---
+C 0x4067 la BIOS espera volver con las interrupciones abiertas
+
+B 0x4069 --- los catorce registros del PSG, uno por uno -----------
+L 0x4069 toca  Monta los catorce registros del PSG con la nota de cada canal
+C 0x4069 el primer byte de partitura del canal A
+C 0x406C 0x3F: los tres tonos y los tres ruidos callados
+C 0x406E si el byte del canal A es 0, el canal no suena
+C 0x4074 y si no lo es, se abre el tono del canal A (bit 0 a cero)
+C 0x4077 lo mismo para el canal B...
+C 0x4080 ...bit 1
+C 0x4083 ...y para el C
+C 0x408C bit 2
+C 0x408F registro 7: la mezcla que se acaba de calcular
+C 0x4094 registros 11 y 12: periodo del envolvente, a 0xFFFF
+C 0x409F registros 8, 9 y 10: el volumen de los tres canales
+C 0x40AD siguiente byte del canal A: el nibble bajo es el tono fino
+C 0x40B3 registro 1: los cuatro bits altos del tono del canal A
+C 0x40B8 el byte siguiente de la partitura es el tono grueso
+C 0x40BB registro 0
+C 0x40BF ahora el canal B: registros 3 y 2
+C 0x40D2 y el canal C: registros 5 y 4
+C 0x40E5 0xF8CB: un compas mas
+C 0x40EB a los seis compases toca mirar si hay cambio de melodia
+C 0x40F2 avanza la duracion de los tres canales, uno de tres en tres
+C 0x4104 lee el byte de duracion del canal A
+C 0x4108 si es cero, la melodia se ha acabado
+C 0x410E el nibble alto es cuantos compases dura la nota
+C 0x4111 0xF8D0 lleva los compases ya gastados
+C 0x4115 si no ha llegado, la nota sigue sonando
+C 0x4118 y si ha llegado, el puntero del canal A avanza dos bytes...
+C 0x4120 ...y el contador de compases se pone a cero
+C 0x4124 --- lo mismo para el canal B ---
+C 0x4144 --- y para el canal C ---
+C 0x4127 el byte de duracion del canal B
+C 0x412A si es cero, ese canal ya no tiene nada
+C 0x412E los compases que dura la nota
+C 0x4131 y los que lleva sonando
+C 0x4138 el puntero del canal B avanza dos bytes
+C 0x4147 el byte de duracion del canal C
+C 0x414A si es cero, se acabo la vuelta
+C 0x4151 los compases gastados del canal C
+C 0x4158 el puntero del canal C avanza dos bytes
+C 0x4161 y su contador de compases, a cero
+L 0x4167 escribe_psg  WRTPSG con las interrupciones cerradas
+C 0x4167 WRTPSG las abre al salir, y aqui estamos dentro de un gancho
+L 0x416D avanza_contador  (HL)++ y devuelve el valor nuevo
+L 0x4171 nibble_alto  A >> 4: los compases que dura la nota
+C 0x4171 cuatro desplazamientos a la derecha...
+C 0x4179 ...y el resultado tambien en E
+L 0x417B primer_canal  Pone el cursor en el canal A y lee su byte de partitura
+C 0x417B 0xF8CE es el primer canal...
+C 0x417E ...y 0xF8D9 el cursor que va a recorrer los tres
+L 0x4181 siguiente_canal  Lee el byte de partitura del canal en curso y avanza tres
+C 0x4181 el cursor apunta al puntero de partitura del canal
+C 0x4184 BC = ese puntero
+C 0x4189 tres bytes por canal: puntero (2) y duracion (1)
+C 0x418E y devuelve el byte de partitura al que apunta
+C 0x4190 --- el canal A se ha quedado sin notas ---
+C 0x4192 se anota en 0xF8CD y se sigue con los otros dos canales
+C 0x4198 --- el canal B tambien: entonces la melodia ha terminado ---
+C 0x41A4 si el puntero de melodia es 0x0000 no hay lista que seguir
+C 0x41AC y sin lista, silencio: los tres canales a 0x0B
+C 0x41BE con lista, se pasa a la entrada siguiente, cuatro bytes mas alla
+C 0x41CB si esa entrada es el 0x0000 del final, a callar
+L 0x41D6 carga_melodia  Copia los dos punteros de la melodia de (0xF8D7) a los canales
+C 0x41D6 la entrada son cuatro bytes: canal A (2) y canal B (2)
+C 0x41DA byte bajo del puntero del canal A
+C 0x41DF byte alto
+C 0x41E4 y los dos del canal B
+L 0x41ED es_fin_de_lista  Devuelve 1 si la entrada de melodia de 0xF8D7 es 0x0000
+L 0x41F0 es_fin_de_lista_hl  Igual, pero con HL ya puesto
+C 0x41F0 basta con mirar los dos bytes del puntero del canal A
+C 0x41FD 1 = se acabo la lista
+C 0x4200 0 = todavia hay melodia
+
+B 0x4202 ==========================================================
+B 0x4202  ARRANQUE DE LA PRIMERA PARTE
+B 0x4202 ==========================================================
+B 0x4202 Monta la memoria, presenta el juego y entra en el bucle.
+B 0x4202 Las variables del juego viven todas juntas de 0xF87F a
+B 0x4202 0xF91E, en la zona que el BASIC reserva para las extensiones
+B 0x4202 de disco y que aqui no usa nadie. Las mas importantes:
+B 0x4202
+B 0x4202   0xF87F..0xF88E  los seis punteros de trabajo de los
+B 0x4202                   volcadores a VRAM
+B 0x4202   0xF893  numero de pantalla, de 0 a 7
+B 0x4202   0xF894  ultima direccion leida del mando
+B 0x4202   0xF89C  el estado del protagonista: elige que juego de
+B 0x4202           sprites de 0x168 bytes se usa
+B 0x4202   0xF89D  columna por la que se recorta el mapa ancho
+B 0x4202   0xF89F  pasos dados en la aventura
+B 0x4202   0xF8A0  marcador
+B 0x4202   0xF8C4  ultima lectura del gatillo
+B 0x4202   0xF8C6  la pantalla que se esta tocando en la musica
+L 0x4202 principal  Punto de entrada del bloque
+C 0x4202 la pila, justo debajo de la zona de trabajo
+C 0x4207 0xF8A5: el contador de repeticiones de melodia, a cero
+C 0x420A 0xC103 es un byte de los propios patrones, y hace de marca...
+C 0x420D ...si no vale 8, es que todavia no se han volteado
+C 0x420F y entonces se voltean, una sola vez por partida
+C 0x4212 HL: primera variable del juego
+C 0x4215 DE: la ultima
+C 0x4218 --- borra de 0xF87F a 0xF91E ---
+C 0x421E 0xF8C6 a 0xFF: asi la primera pantalla cuenta como cambio
+C 0x4223 --- monta las cuatro primeras fichas de objeto ---
+C 0x4223 las coordenadas de partida estan en 0xC610, dos por ficha
+C 0x4229 y las fichas, a partir de 0xAAFD
+C 0x422C X de la ficha
+C 0x4234 Y de la ficha
+C 0x423C el tercer byte, el estado, arranca en 3
+C 0x4240 el cuarto, el fotograma, en 0
+C 0x4242 y los siete restantes se dejan como esten
+C 0x4246 cuatro fichas de once bytes: de 0xAAFD a 0xAB29
+C 0x424D --- restaura la esquina del mapa ancho ---
+C 0x424D el mapa ancho vive en 0x97F5...
+C 0x4253 ...y su version intacta, en 0xCBD7
+C 0x4269 0x9874: 0x7F bytes, las dos primeras filas y pico
+C 0x4270 --- retoques sueltos sobre las pantallas ya cargadas ---
+C 0x4273 0x1F: una fila de 32 baldosas menos una
+C 0x42B4 FORCLR: tinta 1
+C 0x42BB BAKCLR y BDRCLR: fondo y borde en 14
+C 0x42C0 ENASCR
+C 0x42C3 SCREEN 2
+C 0x42C8 --- la presentacion, rotulo a rotulo ---
+C 0x42C8 destino en la tabla de patrones
+C 0x42CE color del rotulo
+C 0x42D3 0x0704: cuatro baldosas de ancho por siete de alto
+C 0x42D9 y el dibujo, en 0x80E0
+C 0x42E2 el segundo rotulo: a 0x0250, color 8, dos por cuatro
+C 0x42FC el texto de la presentacion: empieza en la baldosa 0x0560
+C 0x4302 la cadena, en 0x8200
+C 0x430B el segundo bloque de texto, en la baldosa 0x0750
+C 0x4311 cuatro tiempos de espera
+C 0x4316 espera a que se agote la cuenta de 0xF887
+C 0x431D tercer bloque, en 0x1010
+C 0x432F el ultimo rotulo: a 0x10C0, color 0x0C, cuatro por siete
+C 0x4349 arranca la melodia de la presentacion...
+C 0x434C ...y espera a que termine
+C 0x4352 la toca otra vez...
+C 0x4355 ...y al acabar, al juego
+L 0x435E toca_presentacion  Arranca la melodia cuya entrada esta en 0x82EF
+C 0x435E 0x82EF: los dos punteros de la melodia de la presentacion
+C 0x4361 el reproductor se reinicia entero
+C 0x4367 los punteros se cambian con la interrupcion cerrada
+L 0x4373 melodia_terminada  Devuelve Z si el puntero de melodia se ha quedado a cero
+C 0x4373 DCOMPR con 0x0000: el reproductor lo pone asi al acabar
+L 0x437C espera_un_rato  Una vuelta de la cuenta atras de 0xF887
+C 0x437C de paso escribe la linea de texto que toque
+C 0x437F dos pasos del contador lento por cada linea
+C 0x4385 y uno de la cuenta atras
+L 0x438D tic  0xF88E++: el contador lento de la presentacion
+L 0x4395 escribe_texto  Escribe una cadena en la tabla de patrones, letra a letra
+C 0x4395 una baldosa por letra
+C 0x439A 0xF88D: la baldosa donde empieza la linea
+C 0x43A0 calcula el color con el que se va a escribir
+C 0x43A3 --- una letra por vuelta ---
+C 0x43A6 el codigo de caracter
+C 0x43AA 0x0D termina la linea
+C 0x43AF 0x1BBF es CGTABL: la fuente de la ROM del BASIC
+C 0x43B5 ocho bytes por caracter: se salta uno a uno
+C 0x43C6 el patron de la letra, a la tabla de patrones
+C 0x43CC y el color, ocho bytes iguales
+C 0x43DC pasa a la letra siguiente
+C 0x43DF y a la baldosa siguiente
+L 0x43E5 siguiente_letra_texto  Adelanta un byte el puntero de la cadena
+L 0x43ED siguiente_baldosa  Suma 8 al destino: la baldosa de al lado
+L 0x43F6 color_del_sitio  Compone el color mezclando el que ya hay en pantalla
+C 0x43F6 el byte bajo del destino hace de coordenada X...
+C 0x43FA ...y el alto, de Y
+C 0x4401 MAPXY deja el cursor grafico en ese punto
+C 0x4404 READC devuelve el color del pixel que hay debajo
+C 0x4408 el color pedido pasa a ser la tinta...
+C 0x4413 ...y el de la pantalla, el fondo
+L 0x4418 dibuja_rectangulo  Vuelca un dibujo de N baldosas de ancho por M de alto
+C 0x4418 el byte bajo de 0xF883 es el ancho en baldosas...
+C 0x441B ...que por ocho da los bytes de cada fila
+C 0x4424 el color, del sitio donde va a caer
+C 0x4427 --- una fila de baldosas por vuelta ---
+C 0x442A destino en la tabla de patrones
+C 0x442E origen en RAM
+C 0x4434 y el mismo tramo en la tabla de colores, de un solo color
+C 0x4444 el destino sube 0x100: una fila entera de baldosas
+C 0x444A el origen avanza los bytes de una fila
+C 0x4451 el byte alto de 0xF883, o sea 0xF884, es el numero de filas
+L 0x445E bytes_por_fila  BC = los bytes que ocupa una fila del dibujo
+L 0x4465 baja_una_fila  Suma 0x100 al destino en VRAM: 32 baldosas
+L 0x446D vuelca_con_color  Patrones y colores completos: consume 2*BC bytes
+C 0x446D primero los patrones, y HL queda detras de ellos
+C 0x4473 el origen sigue donde acabaron los patrones
+C 0x4479 y el destino, en la tabla de colores
+C 0x447F y se repite la copia en los tres tercios
+L 0x4482 pinta_baldosa  Rellena de un color las ocho filas de una baldosa, en los tres tercios
+C 0x4482 el primer tercio...
+C 0x4485 ...el segundo...
+C 0x4488 ...y por caida, el tercero
+C 0x448E ocho bytes iguales: el color de las ocho filas
+L 0x4497 vuelca_patrones  Copia BC bytes a la VRAM y repite en los otros dos tercios
+C 0x4497 0xF887 guarda el origen para quien venga detras...
+C 0x449A ...0xF889 la longitud...
+C 0x449E ...y 0xF88B el destino
+C 0x44B2 la copia, en los tres tercios
+C 0x44B5 al salir, el origen ya apunta detras de lo copiado
+C 0x44C0 y el destino, a la tabla de colores del mismo sitio
+L 0x44CB vuelca_comprimido  Como la anterior, pero un byte de color POR BALDOSA
+C 0x44CB destino por omision: 0x2D8, la baldosa 0x5B
+L 0x44CE vuelca_comprimido_en  Igual, pero con el destino en DE
+C 0x44D1 --- un byte de color por baldosa ---
+C 0x44D4 el byte de color de esta baldosa
+C 0x44D8 y la baldosa donde va
+C 0x44DE ocho filas del mismo color, en los tres tercios
+C 0x44E1 siguiente byte de color
+C 0x44E4 siguiente baldosa
+C 0x44E7 quedan ocho bytes de patron menos
+C 0x44EA cuando la cuenta llega a cero, se acabo
+L 0x44F2 tres_tercios  La misma copia en DE, DE+0x800 y DE+0x1000
+C 0x44F2 primer tercio
+C 0x44F8 segundo
+C 0x44FE tercero, por caida
+L 0x44FE copia_vram  LDIRVM con los tres punteros que hay en 0xF87F, 0xF881 y 0xF883
+L 0x450C baja_un_tercio  Suma 0x800 al destino en VRAM
+C 0x450F basta con sumar 8 al byte alto
+C 0x4513 y de vuelta al puntero
+L 0x4517 siguiente_color  Adelanta un byte el puntero de colores
+C 0x4517 un byte de color por baldosa
+L 0x451F siguiente_baldosa_color  Suma 8 al destino: la baldosa de al lado
+C 0x4522 ocho filas por baldosa
+L 0x452A quedan_ocho_menos  Descuenta ocho bytes de patron de lo que falta
+C 0x452D una baldosa son ocho bytes de patron
+C 0x4531 el XOR de delante deja el acarreo a cero para el SBC
+L 0x4537 anima_olas  Recorre las cuatro baldosas del agua y les da la vuelta
+C 0x4537 con el protagonista en movimiento, el agua se queda quieta
+C 0x453D una vuelta de cada cuatro
+C 0x454B 0xF88F: el fotograma del oleaje, de 0 a 3
+C 0x4561 0x1A40: la fila 18 de la tabla de nombres
+C 0x4567 --- una baldosa por vuelta ---
+C 0x456C fotograma 0: la ola alta
+C 0x456F fotograma 2: la ola baja
+C 0x4574 y los impares, la ola intermedia
+C 0x457E el fotograma va rotando de 0 a 3
+C 0x458E de dos en dos baldosas
+C 0x4596 0x1A60: el final de la franja de agua
+L 0x45B2 pon_par_de_olas  Escribe una pareja de baldosas de ola
+L 0x45B5 pon_ola  Escribe la baldosa A y la de al lado
+C 0x45B8 WRTVRM
+C 0x45BE 0x7D es la baldosa "sin ola": no gasta fotograma
+L 0x45D0 pon_ola_abajo  La misma pareja, una fila mas abajo
+C 0x45D0 la baldosa que toca en la fila de abajo
+C 0x45D6 0x20: una fila de la tabla de nombres
+C 0x45DD se escribe la pareja
+C 0x45E3 y el puntero vuelve a la fila de arriba
+L 0x45EF espera_2000  Cuenta hasta 2000 en 0xF891: la pausa larga
+C 0x45EF 0xF891 es el contador de espera
+C 0x45F6 0x7D0 = 2000 vueltas
+C 0x45FD y al llegar se pone a cero para la proxima
+B 0x4604 --- las ocho pantallas ----------------------------------
+B 0x4604 Cada una carga sus patrones y su tabla de nombres. Los
+B 0x4604 tamanos no se pasan como longitud del bloque de datos sino
+B 0x4604 como longitud EN VRAM: quien sabe cuantos bytes de cinta
+B 0x4604 consume cada bloque es la rutina de volcado, y por eso los
+B 0x4604 bloques encajan uno detras de otro sin dejar huecos.
+L 0x4604 carga_pantalla  Vuelca los patrones, los colores y el mapa de la pantalla 0xF893
+C 0x4604 ocho pantallas, de la 0 a la 7
+L 0x4630 pantalla_0  El puerto de Palos: la taberna, el muelle y el agua
+C 0x4630 su tabla de nombres
+C 0x4636 patrones propios: 0x1C0 bytes y 0x38 de color, a la baldosa 0x5B
+C 0x463F y 0x20 bytes mas con su tabla de color entera
+C 0x464B al salir, redibuja la franja del agua
+C 0x4609 pantalla 0
+C 0x460E pantalla 1
+C 0x4616 pantalla 3
+C 0x461B pantalla 4
+C 0x4625 pantalla 6
+C 0x462A pantalla 7
+L 0x464E pantalla_1  Sus patrones y su tabla de nombres
+C 0x464E la tabla de nombres, en 0x85F5
+C 0x4654 0x178 bytes de patrones a la baldosa 0x5B
+C 0x465D y 0x40 mas a la baldosa 0x8A, con su color completo
+L 0x4669 pantalla_2  Sus patrones y su tabla de nombres
+C 0x4669 la tabla de nombres, en 0x88F5
+C 0x466F 0x140 bytes de patrones a la baldosa 0x5B
+C 0x4678 y 0x70 mas a la baldosa 0x83
+L 0x4684 pantalla_3  Sus patrones y su tabla de nombres
+C 0x4684 la tabla de nombres, en 0x8BF5
+C 0x468A 0x1A0 bytes de patrones a la baldosa 0x5B
+C 0x4693 y 0x68 mas a la baldosa 0x8F
+L 0x469F pantalla_4  Sus patrones y su tabla de nombres
+C 0x469F la tabla de nombres, en 0x8EF5
+C 0x46A5 0x1A8 bytes de patrones a la baldosa 0x5B
+C 0x46AE y 0xA0 mas a la baldosa 0x90
+L 0x46BA pantalla_5  El interior de la taberna; no lleva bloque de color aparte
+C 0x46BA la tabla de nombres, en 0x91F5
+C 0x46C0 0xF8 bytes de patrones a la baldosa 0x5B, y nada mas
+L 0x46C9 pantalla_6  Sus patrones y su tabla de nombres
+C 0x46C9 la tabla de nombres, en 0x94F5
+C 0x46CF 0xA0 bytes de patrones a la baldosa 0x5B
+C 0x46D8 y 0x58 mas a la baldosa 0x6F
+L 0x46E4 pantalla_7  La del mapa ancho: la tabla de nombres se compone a mano
+C 0x46E4 aqui no hay tabla que copiar: se recorta del mapa de 64 columnas
+C 0x46E7 0x198 bytes de patrones a la baldosa 0x5B
+C 0x46F0 y 0x48 mas a la baldosa 0x8E
+L 0x46FC carga_comunes  Los patrones que llevan todas las pantallas
+C 0x46FC 0x2A0 bytes de patrones a partir de la baldosa 0
+C 0x4705 se prepara la copia...
+C 0x4708 ...y se pintan los colores, uno por baldosa
+C 0x470B y 0x40 bytes mas a la baldosa 0x53, con su color completo
+L 0x4717 vuelca_nombres  Copia una tabla de nombres de 0x300 bytes a la VRAM
+C 0x471A 0x1800: la tabla de nombres
+C 0x4720 0x300 bytes: 32 por 24
+L 0x4729 monta_mapa_ancho  Compone la pantalla 7 recortando 32 columnas del mapa de 64
+C 0x4729 0xF88C cuenta las filas
+C 0x472E 0xF89D es la columna por la que se recorta: el scroll de la fase 7
+C 0x4732 el mapa ancho empieza en 0x97F5
+C 0x4739 32 baldosas por fila
+C 0x473F y van a la tabla de nombres
+C 0x4745 --- una fila por vuelta ---
+C 0x474B el mapa tiene 64 baldosas de ancho, por eso el paso es 0x40...
+C 0x4755 ...mientras que en la pantalla solo caben 32
+C 0x4763 veinticuatro filas
+L 0x4768 mueve_al_protagonista  Anima y desplaza al personaje segun el mando
+C 0x4768 con 0xF89C a 0xFF el protagonista esta fuera de juego
+C 0x476E recalcula los punteros de la ficha y de los sprites
+C 0x4771 lee el mando
+C 0x4779 3 = a la derecha
+C 0x4781 5 = abajo
+C 0x4789 7 = a la izquierda
+C 0x4791 sin direccion, el fotograma se queda como esta
+C 0x47A0 --- arriba ---
+C 0x47AA sube una fila si la baldosa de encima lo permite
+C 0x47B6 el fotograma del paso avanza de 0 a 3...
+C 0x47C3 ...o retrocede, segun hacia donde se ande
+C 0x47D8 --- a la derecha ---
+C 0x47F1 --- abajo ---
+C 0x480A --- a la izquierda ---
+C 0x4823 al andar de verdad, un fotograma mas
+L 0x4831 pinta_al_protagonista  Deja al muñeco en su sitio, con su sprite y su color
+C 0x4831 estado 2: el muñeco esta cayendo o subiendo
+C 0x483B con el estado a cero no hay nada que dibujar
+C 0x4841 0xD6D8 sobrevive entre las dos partes del juego
+L 0x4849 coloca_la_figura  Deja el sprite base donde toca segun el estado
+C 0x484E estado 3: la figura no se mueve de sitio
+C 0x4853 estado 1: la variante de 0x4958
+C 0x4859 se guarda la posicion antes de tocarla
+C 0x485F 0xF0: el desplazamiento hasta el sprite de esta postura
+C 0x4869 0x78: la altura de la figura
+C 0x486F sube el sprite a la VRAM
+C 0x4872 y elige el patron que toca
+C 0x487B 0x3800 es la tabla de patrones de sprite
+C 0x4884 ocho bytes por pieza de sprite
+C 0x488A --- de ocho en ocho bytes se saca el numero de patron ---
+C 0x489B 0x1B28: la decima entrada de la tabla de atributos de sprite
+C 0x48A1 el numero de patron calculado
+C 0x48A7 X e Y del muñeco, de su propia ficha
+C 0x48B3 y a partir de aqui, las dieciseis piezas de la figura
+L 0x490A ocho_a_la_derecha  X += 8: la pieza de sprite de al lado
+L 0x4913 ocho_a_la_izquierda  X -= 8
+L 0x491C dieciseis_abajo  Y += 0x10
+L 0x4925 dieciseis_arriba  Y -= 0x10
+L 0x492E pinta_cayendo  Variante del dibujo cuando el estado vale 2
+C 0x492E el campo 5 de la ficha es el parpadeo
+C 0x4935 con parpadeo, se alterna la figura
+C 0x4938 y 0xD6D8 va y viene entre las dos posturas
+L 0x4943 pinta_quieto  Variante del dibujo cuando el estado vale 0
+C 0x4943 el campo 5 de la ficha
+C 0x494A sin parpadeo, se alterna igual pero al reves
+L 0x495E fila_de_cuatro  Cuatro piezas de sprite en fila y vuelta al principio
+C 0x495E patron base + 6
+C 0x4966 patron base + 7, tres veces seguidas
+C 0x4974 y la X vuelve 0x20 pixeles atras: cuatro piezas
+L 0x497D fila_de_dos  Dos piezas de sprite en fila
+C 0x497D patron base + 8
+C 0x4988 y la X vuelve 0x10 atras
+L 0x4990 remate_de_figura  Las piezas sueltas de arriba: la cabeza y los brazos
+C 0x4990 cinco pixeles a la derecha...
+C 0x4998 ...y cuatro hacia abajo
+C 0x49A0 patron base + 9
+C 0x49A8 ocho pixeles atras
+C 0x49B0 patron base + 10
+C 0x49B8 un pixel atras
+C 0x49BF patron base + 11
+C 0x49C7 y el color, del campo 1 de la ficha
+L 0x49D4 pieza_suelta  Una pieza de sprite y ocho pixeles atras
+C 0x49D4 patron base + 7
+C 0x49DC ocho pixeles a la izquierda
+L 0x49E4 ultima_pieza  La ultima pieza de la figura
+L 0x49F1 pon_pieza  Escribe una entrada de la tabla de atributos: Y, X, patron y color
+C 0x49F1 0xF882 es el numero de patron
+C 0x49F4 0xF8C2 marca la caida: entonces la figura se recorta por abajo
+C 0x49FF Y
+C 0x4A02 X
+C 0x4A05 numero de patron
+C 0x4A08 color
+C 0x4A14 el siguiente sprite lleva el patron siguiente
+C 0x4A1B y va ocho pixeles mas abajo
+C 0x4A35 cayendo, todo lo que pase de la fila 0xA0 se manda fuera
+C 0x4A3D 0xD1: fuera de la pantalla por abajo
+L 0x4A27 escribe_atributo  Un byte a la tabla de atributos y adelante el puntero
+C 0x4A2A WRTVRM
+C 0x4A2D y a la casilla siguiente
+L 0x4A42 patron_base  Deja en 0xF881 el patron de partida de la figura
+C 0x4A42 desplazamiento 4 respecto del patron de la postura
+C 0x4A44 se guarda el desplazamiento pedido
+C 0x4A49 el campo 3 de la ficha es el estado
+C 0x4A4E con estado distinto de cero no se toca el patron
+C 0x4A53 0xF884 trae el patron de la postura
+C 0x4A57 y la suma es el patron con el que se empieza a dibujar
+L 0x4A5B patron_mas_0  La figura sin desplazamiento
+L 0x4A5F patron_mas_10  Diez patrones mas alla
+L 0x4A64 patron_mas_8  Ocho patrones mas alla
+L 0x4A69 patron_mas_16  Dieciseis patrones mas alla
+L 0x4A6E patron_mas_15  Quince patrones mas alla
+L 0x4A73 patron_mas_18  Dieciocho patrones mas alla
+L 0x4A78 patron_mas_17  Diecisiete patrones mas alla
+L 0x4A7D patron_mas_12  Doce patrones mas alla
+L 0x4A82 pon_sprite  Elige el patron de sprite que toca y lo sube a la VRAM
+C 0x4A82 0x78 por debajo del patron base
+C 0x4A8A dieciseis bytes: media figura de 16x16
+C 0x4A8D el sprite de partida
+C 0x4A93 estado 1: el muñeco esta parado
+C 0x4AA3 el campo 4 de la ficha es el fotograma del paso
+C 0x4AAC los fotogramas van de dieciseis en dieciseis bytes
+C 0x4AB2 --- salta tantos fotogramas como diga el campo 4 ---
+C 0x4ABF y la otra media figura, 0x10 mas alla
+C 0x4AC5 0x88 por debajo del patron base
+C 0x4AD3 parado: el sprite de 0x9DF5
+L 0x4AD9 parpadea  Alterna el fotograma de parpadeo y voltea la figura
+C 0x4ADF el campo 5 de la ficha alterna entre 0 y 1
+C 0x4AE8 la mitad de arriba de la figura
+C 0x4AFA y se le da la vuelta a cada byte
+L 0x4B08 alterna_d6d8  0xD6D8 va y viene entre 0 y 1: el balanceo del muñeco
+C 0x4B08 el byte esta por encima de 0xD300, o sea que sobrevive a la recarga
+C 0x4B0F al llegar a 1 se queda...
+C 0x4B14 ...y si pasa, vuelve a cero
+C 0x4B18 y con el, los sprites de 0x9E05 a 0x9E54
+L 0x4B1E voltea_bits  Invierte el orden de los bits de cada byte entre HL y DE
+C 0x4B1E asi se consigue el dibujo mirando al otro lado sin gastar mas bytes
+C 0x4B20 el byte original
+C 0x4B21 bit 0 del original...
+C 0x4B23 ...pasa a ser el bit 7 del resultado
+C 0x4B49 y el byte volteado se escribe encima del original
+C 0x4B4B hasta llegar a DE
+L 0x4B50 bit0_a_bit7  Uno de los ocho pasos del volteo
+L 0x4B68 baja_cuatro  (HL) += 4: cuatro pixeles hacia abajo o hacia la derecha
+L 0x4B6D sube_cuatro  (HL) -= 4
+L 0x4B72 anda_a_la_izquierda  Cuatro pixeles a la izquierda, si la baldosa deja
+C 0x4B72 el campo 1 de la ficha es la X
+C 0x4B77 en la columna 0 no se puede ir mas a la izquierda
+C 0x4B7A se prueba a mover...
+C 0x4B7D ...y si la baldosa no deja, se deshace
+L 0x4B85 deshaz_izquierda  Devuelve al muñeco los cuatro pixeles
+L 0x4B8D anda_a_la_derecha  Cuatro pixeles a la derecha, si la baldosa deja
+C 0x4B92 0xF0 es el borde derecho: ahi se cambia de pantalla
+C 0x4B97 se prueba a mover...
+C 0x4B9A ...y se mira que hay
+L 0x4BA2 deshaz_derecha  Devuelve al muñeco los cuatro pixeles
+L 0x4BAA anda_hacia_arriba  Cuatro pixeles hacia arriba, si la baldosa deja
+C 0x4BAA el campo 2 de la ficha es la Y
+C 0x4BAF en la fila 0 no se sube mas
+C 0x4BB2 se prueba...
+C 0x4BB5 ...y si no deja, se queda como estaba
+L 0x4BC0 anda_hacia_abajo  Cuatro pixeles hacia abajo, si la baldosa deja
+C 0x4BC5 0x98 es el borde de abajo
+C 0x4BCA se prueba a bajar
+C 0x4BD3 en la pantalla 0, salirse por abajo es caerse al agua
+L 0x4BE0 scroll_a_la_derecha  En la pantalla 7, corre el mapa ancho una columna
+C 0x4BE3 solo la pantalla 7 tiene mapa ancho
+C 0x4BEB bit 2 del estado: el muñeco esta a ras de suelo
+C 0x4BF1 0x20 es el tope: media pantalla de recorrido
+C 0x4BF8 el muñeco vuelve una columna atras para compensar
+C 0x4BFB y se recompone la pantalla
+L 0x4C01 scroll_a_la_izquierda  Lo mismo hacia el otro lado
+C 0x4C04 solo en la pantalla 7
+C 0x4C0C el muñeco tiene que ir a ras de suelo
+C 0x4C12 y en la columna 0 no hay mas que correr
+C 0x4C19 se compensa el movimiento y se recompone
+L 0x4C1F campo_del_objeto  Devuelve el byte A-1 de la ficha de objeto en 0xF887
+C 0x4C1F cada ficha son once bytes; el 1 es X, el 2 es Y, el 3 el estado...
+C 0x4C23 la ficha en curso
+C 0x4C27 y el campo pedido
+L 0x4C29 pon_sprite_de_brazo  El sprite del brazo, que cambia con lo que se lleva
+C 0x4C2E sin fotograma, no hay brazo que dibujar
+C 0x4C41 los brazos empiezan en 0x9E15
+C 0x4C5D 0x88 por debajo del patron base
+C 0x4C47 --- salta tantos brazos como diga el campo 4 ---
+C 0x4C5A el brazo elegido
+C 0x4C6E estado 2: el brazo se lee de la propia pantalla
+C 0x4C7F se recogen los bytes de la VRAM uno a uno...
+C 0x4C9F ...con RDVRM...
+C 0x4CB1 ...y se sueltan como color de sprite
+
+B 0x4CC5 --- el bucle del juego ----------------------------------
+L 0x4CC5 arranca_el_juego  Carga la pantalla 0 y entra en el bucle
+L 0x4CCB bucle_principal  Dieciseis llamadas por vuelta, hasta que 0xF8A6 avise
+C 0x4CCB la pausa que marca el ritmo
+C 0x4CCE la musica de la pantalla en la que estamos
+C 0x4CD1 el muñeco
+C 0x4CFB 0xF8A6: alguien ha pedido cambiar de escena
+L 0x4D03 bucle_de_escena  El bucle corto de las escenas sin control del jugador
+C 0x4D03 aqui el mando no pinta nada: la escena va sola
+C 0x4D06 la musica sigue
+C 0x4D0F un paso de la escena
+C 0x4D15 0xF8A7 lleva el paso de la escena; el 9 la termina
+C 0x4D22 mientras dura, el muñeco se sigue dibujando
+C 0x4D2B y al acabar se vuelve al bucle largo
+L 0x4D35 puede_pasar  Mira la baldosa que hay delante y dice si se puede pisar
+C 0x4D35 andando en horizontal se mira solo la baldosa de delante...
+C 0x4D45 ...pero en vertical hay que mirar tambien la de detras
+C 0x4D4B por eso se adelanta el muñeco, se mira, y se deshace
+L 0x4D65 baldosa_de_delante  Devuelve el numero de la baldosa que hay bajo el muñeco
+C 0x4D6D andando hacia la derecha se mira cuatro pixeles mas alla
+C 0x4D7D +4 y dividido entre 8: de pixeles a columna
+C 0x4D8B 0x1800: la tabla de nombres
+C 0x4D97 la Y, con el mismo apaño, da la fila
+C 0x4DA8 y cada fila son 0x20 baldosas
+C 0x4DBB RDVRM: el numero de baldosa
+C 0x4DC1 y cada pantalla tiene su lista de baldosas que no se pisan
+L 0x4DEC no_se_puede  Devuelve 1: hay algo delante
+B 0x4DEF --- las baldosas por las que no se pasa -----------------
+B 0x4DEF Una lista de comparaciones por pantalla, sin tabla: cada
+B 0x4DEF `cp` es un numero de baldosa contra el que se choca. Se
+B 0x4DEF entiende mejor mirando el dibujo de la pantalla que leyendo
+B 0x4DEF la lista; tools/dibuja.py las saca todas.
+L 0x4DEF solidas_pantalla_0  Las dos baldosas por las que no se pasa en el puerto
+C 0x4DEF el numero de baldosa que devolvio 0x4D65
+C 0x4DF2 0x92 y 0x7C: los sillares del muelle
+C 0x4DFC lo demas se pisa
+L 0x4DFF solidas_pantalla_1  Las once de la pantalla 1
+C 0x4DFF el numero de baldosa
+C 0x4E02 0x50, 0x3D, 0x3C, 0x01, 0x0D...
+C 0x4E1B ...0x6B, 0x87, 0x35, 0x34, 0x3F y 0x32
+C 0x4E39 lo demas se pisa
+L 0x4E3C solidas_pantalla_2  Las siete de la pantalla 2
+C 0x4E3C el numero de baldosa
+C 0x4E3F 0x61, 0x52, 0x3C, 0x0D...
+C 0x4E53 ...0x5D, 0x3D y 0x50
+C 0x4E62 lo demas se pisa
+L 0x4E65 solidas_pantalla_3  Las seis de la pantalla 3
+C 0x4E65 el numero de baldosa
+C 0x4E68 0x3D, 0x50, 0x89...
+C 0x4E77 ...0x3C, 0x01 y 0xFD
+C 0x4E86 lo demas se pisa
+L 0x4E89 solidas_pantalla_4  Las siete de la pantalla 4
+C 0x4E89 el numero de baldosa
+C 0x4E8C 0x3D, 0x50, 0x52, 0x0D...
+C 0x4EA0 ...0x3C, 0x01 y 0xFD
+C 0x4EAF lo demas se pisa
+L 0x4EB2 solidas_pantalla_5  Las seis de la pantalla 5
+C 0x4EB2 el numero de baldosa
+C 0x4EB5 0x3D, 0x01, 0x50...
+C 0x4EC4 ...0x0D, 0x3C y 0xFD
+C 0x4ED3 lo demas se pisa
+L 0x4ED6 solidas_pantalla_6  Las once de la pantalla 6
+C 0x4ED6 el numero de baldosa
+C 0x4ED9 0x50, 0x3D, 0x3C, 0x01, 0x5E...
+C 0x4EF2 ...0x52, 0x61, 0x0D, 0x5C, 0x13 y 0x65
+C 0x4F10 lo demas se pisa
+L 0x4F13 solidas_pantalla_7  Las siete de la pantalla 7
+C 0x4F13 el numero de baldosa
+C 0x4F16 0x01, 0x3C, 0x52, 0x5D...
+C 0x4F2A ...0x50, 0x3D y 0x0D
+L 0x4F39 se_puede_pasar  No es solida: guarda la posicion y mira si hay puerta
+C 0x4F39 el campo 1 de la ficha es la X...
+C 0x4F41 ...y el 2, la Y
+C 0x4F46 las dos juntas en HL, para compararlas de una vez
+L 0x4F49 mira_las_puertas  Segun la pantalla, decide si se cambia de escena
+C 0x4F49 cada pantalla tiene sus puertas y sus condiciones
+C 0x4F4C pantalla 0
+C 0x4F51 pantalla 1
+C 0x4F56 pantalla 2
+C 0x4F5B pantalla 3
+C 0x4F60 pantalla 4
+C 0x4F65 pantalla 5
+C 0x4F6A pantalla 6
+C 0x4F6F pantalla 7
+C 0x4F74 sin puerta: se sigue como si nada
+L 0x4F76 puertas_pantalla_0  Del puerto se sale a la taberna o al agua
+C 0x4F7B las columnas 0x30 a 0x34 son la puerta de la taberna
+C 0x4F85 y hay que estar andando hacia la derecha
+C 0x4FDA las columnas 0x70 a 0x84 son la otra salida
+C 0x4FE4 pero solo con tres pasos ya dados
+C 0x4FFF la columna 0xF0 es el borde: se sale por la derecha
+L 0x4FC6 borra_sprites  Manda todos los sprites fuera de la pantalla
+C 0x4FC6 0x1B00: la tabla de atributos de sprite
+C 0x4FCC 0xD1 en la Y: fuera de la pantalla
+C 0x4FD1 cuatro bytes por sprite
+L 0x4F92 cambia_de_pantalla  Deja puesta la pantalla A con el muñeco en HL
+C 0x4F95 HL trae la posicion de partida del muñeco
+C 0x4F98 se reinician el contador lento y la marca de refresco
+C 0x4F9F fuera los sprites de la pantalla anterior
+C 0x4FB0 y se carga la pantalla nueva
+L 0x4FB3 recarga_punteros  Repone los tres punteros de trabajo desde su copia
+C 0x4FB3 la ficha del protagonista
+C 0x4FB9 sus sprites
+C 0x4FBF y su tabla de atributos
+L 0x5014 puertas_pantalla_1  Las salidas de la pantalla 1
+C 0x5014 el campo 2 de la ficha es la Y
+C 0x5019 fila 0x98: el suelo
+C 0x501E y andando hacia abajo, se pasa a la pantalla 0
+C 0x502D --- las columnas 0x10 a 0x18 ---
+C 0x503C hacen falta al menos dos pasos dados
+C 0x5044 y hay que ir hacia la izquierda
+C 0x504E se pasa a la pantalla 4
+C 0x5054 --- las columnas 0xE0 a 0xE8 ---
+C 0x505E hacen falta al menos tres pasos
+C 0x5066 y hay que ir hacia la derecha
+C 0x5074 se pasa a la pantalla 5
+C 0x507C --- las columnas 0x80 a 0x90 ---
+C 0x5086 hacia arriba
+C 0x508E se pasa a la pantalla 3
+L 0x5096 puertas_pantalla_2  Las salidas de la pantalla 2
+C 0x5096 el campo 1 de la ficha es la X
+C 0x509B por debajo de la columna 0x11...
+C 0x50A0 ...y hacia la izquierda
+C 0x50A8 baja el estado y se vuelve a la pantalla 0
+L 0x50B2 puertas_pantalla_3  Las salidas de la pantalla 3
+C 0x50B7 fila 0x98: el suelo
+C 0x50BC hacia abajo
+C 0x50C4 se pasa a la pantalla 1
+L 0x50CC puertas_pantalla_4  Las salidas de la pantalla 4
+C 0x50D1 columna 0xF0: el borde derecho
+C 0x50D6 hacia la derecha
+C 0x50DE se vuelve a la pantalla 1
+L 0x50E6 puertas_pantalla_5  Las salidas de la pantalla 5
+C 0x50EB columna 0xF0: el borde derecho
+C 0x50F0 hacia la derecha
+C 0x50F8 dos pasos de estado
+C 0x50FE se vuelve a la pantalla 1
+L 0x5106 puertas_pantalla_6  Las salidas de la pantalla 6
+C 0x510B fila 0x98: el suelo
+C 0x5110 hacia abajo
+C 0x5118 se vuelve a la pantalla 0
+L 0x516A puertas_pantalla_7  Las salidas de la pantalla 7
+C 0x516F fila 0x98: el suelo
+C 0x5174 con el mapa ancho sin correr del todo
+C 0x517C hacia abajo
+C 0x5184 se vuelve a la pantalla 0
+C 0x518B --- por la derecha del mapa ancho ---
+C 0x5190 a partir de la columna 0xD0
+C 0x5196 y con la fila por encima de 0x79
+C 0x519C hacia abajo
+C 0x51A7 se pasa a la pantalla 6
+L 0x511F sube_estado  El estado del protagonista avanza de 0 a 3 y vuelve
+C 0x511F antes hay que tener los punteros al dia
+C 0x5122 el campo 3 de la ficha es el estado
+C 0x5129 al llegar a 4 vuelve a cero
+L 0x512F baja_estado  El estado del protagonista retrocede de 3 a 0
+C 0x5134 el campo 3 de la ficha
+C 0x5137 en cero, se da la vuelta
+C 0x513F y vuelve a 3
+L 0x5143 puerta_de_la_travesia  La salida de la pantalla 0 que lleva al mapa ancho
+C 0x5143 las columnas 0xB0 a 0xC8
+C 0x514D hace falta haber reclutado marineros (0xF8B9) para poder zarpar
+C 0x5155 y andar hacia arriba
+C 0x515D el mapa ancho arranca por la columna 0x10
+L 0x51AF cuenta_atras  El plazo de la pantalla 3
+C 0x51B6 solo corre en la pantalla 3
+C 0x51C2 el latido del reloj
+C 0x51C5 0xF8A1 cuenta hasta 0xAC
+C 0x51DE 0xAAFD es la X de la primera ficha: donde esta el muñeco
+L 0x5205 arrastra_a_la_izquierda  Empuja al muñeco hasta la columna 0x68
+C 0x5205 0xAAFD es la X del protagonista
+C 0x5208 en la columna 0x68 ya esta donde tiene que estar
+C 0x520D mientras tanto, una pausa...
+C 0x5213 ...y un paso hacia la izquierda
+C 0x5219 al llegar, se le deja con el estado 0
+L 0x521D avanza_el_reloj  Un paso del reloj de arena de la pantalla 3
+C 0x521D 0xF890 cuenta los cuartos ya caidos
+C 0x5224 al tercero se vuelve al primero
+C 0x522F --- el dibujo del reloj, uno de tres ---
+C 0x522F 0xF8A2 gira de 0 a 3
+C 0x523F el 3 se dibuja como el 1
+C 0x5246 tres dibujos de 0x50 bytes, uno por cuarto de reloj
+C 0x524F --- salta hasta el dibujo que toca ---
+C 0x525F 0x0E40: la baldosa donde se pinta el reloj
+C 0x5262 0x50 bytes: diez baldosas
+L 0x5269 marca_refresco  Pone 0xF890 a uno y repinta el marco
+C 0x5269 solo la primera vez
+L 0x5273 pinta_marco  Repinta las franjas de color del marco de la pantalla
+C 0x5273 0x2638: color de una baldosa del marco
+C 0x5279 0xB1: la pareja de colores del marco
+C 0x527E el mismo tramo en la tabla de patrones, con el dibujo 2
+C 0x5289 0x58 bytes: once baldosas seguidas
+C 0x529F 0x0E40: la franja del reloj, en blanco
+C 0x52A9 y una baldosa mas de remate
+L 0x52B4 apunta_al_protagonista  Recalcula los tres punteros que dependen de 0xF89C
+C 0x52B4 la ficha: once bytes por estado
+C 0x52BD y se guarda para quien la necesite
+C 0x52C0 los sprites: 0x168 bytes por estado
+C 0x52CC y la tabla de atributos, siempre en 0x38A0
+L 0x52D5 avanza_por_estado  HL += DE, repetido 0xF89C veces
+C 0x52D5 0xF89C es el estado, o sea el juego de sprites
+C 0x52D8 --- un paso por cada unidad de estado ---
+C 0x52DB con cero pasos, HL se queda como esta
+L 0x52E6 pinta_el_marcador  Pinta o borra el marco segun la pantalla
+C 0x52E6 una sola vez por cambio
+C 0x52F0 0xF8A3 dice en que pantalla toca marco
+L 0x5300 pinta_letrero  Sube los patrones del letrero a la baldosa 0xF9
+L 0x530F borra_letrero  Deja la zona del letrero en blanco
+L 0x534F mira_la_llave  En la pantalla 4, si se llega a la casilla de la llave
+C 0x534F solo en la pantalla 4
+C 0x5355 y con el estado 3
+C 0x535B con el marcador ya en 1 no se repite
+C 0x5366 columna 0x40, fila 0x88
+C 0x5372 sube el marcador...
+C 0x5375 ...y recarga la pantalla, que ha cambiado
+C 0x537D o columna 0x48, fila 0x80
+L 0x5388 mira_el_permiso  En la pantalla 6, la audiencia en la corte
+C 0x5388 solo en la pantalla 6
+C 0x5391 hay que estar en la columna 0x48
+C 0x5399 sin estado, la audiencia se acaba
+C 0x53A1 con estado 2 y tres de marcador...
+C 0x53A6 ...y con al menos tres pasos dados
+C 0x53AE ...los marineros reclutados son el marcador menos dos
+C 0x53B4 --- comprueba que los pasos cuadran con el marcador ---
+C 0x53BD el campo 2 de la ficha: la Y
+C 0x53C2 se le suben cuatro pixeles
+C 0x53C7 y se espera a que el estado llegue a 3
+C 0x53CA con un solo paso, una escena
+C 0x53D2 con dos, otra
+C 0x53DF con 0xFF el protagonista sale de juego
+C 0x53E9 y se va a la pantalla 2
+C 0x53F7 --- con dos de estado, a la pantalla 5 ---
+L 0x541E limpia_estado  Deja el estado del protagonista a cero
+C 0x541E 0xF8A3, 0xF89C y 0xF890, todos a cero
+C 0x542B el campo 3 de la ficha, tambien
+L 0x5433 espera_a_estado  Deja correr el juego hasta que el estado del protagonista sea A
+C 0x5433 el estado al que hay que llegar
+C 0x5439 --- hasta que el campo 3 de la ficha valga eso ---
+C 0x5444 mientras tanto, la pausa, un paso de estado y el dibujo
+L 0x5453 anima_la_puerta  La puerta de la pantalla 4, que se abre y se cierra
+C 0x5453 solo en la pantalla 4
+C 0x545F 0x1A66: la baldosa de la puerta
+C 0x5462 RDVRM: lo que hay puesto ahora
+C 0x5468 alterna entre las baldosas 0x6B y 0x6C
+C 0x5478 WRTVRM
+L 0x5480 mira_el_cofre  En la pantalla 4, el cofre de la columna 0x78
+C 0x5480 solo en la pantalla 4
+C 0x5486 la primera vez hay que pintar el cofre
+C 0x548E con el protagonista fuera de juego, nada
+C 0x5494 y con dos de marcador, ya esta hecho
+C 0x549D la columna: 0x78
+C 0x54A5 y la fila: 1
+C 0x54AA se arrastra al muñeco hasta el cofre
+C 0x54AD y se pasa al estado 4
+C 0x54BE --- se retocan seis baldosas de la pantalla 5 ---
+C 0x54BE 0x911A: la baldosa del cofre en la tabla de nombres
+C 0x54C4 0x20: una fila
+L 0x54DE arrastra_a_la_derecha  Empuja al muñeco hasta la columna 0x54
+C 0x54DE 0xAAFD es la X del protagonista
+C 0x54E1 la columna 0x54 es el destino
+C 0x54E4 mientras no llegue: pausa y un paso a la derecha
+L 0x54F0 abre_el_cofre  Pinta el cofre abierto y su contenido
+C 0x54F4 con un solo paso dado, el cofre sale vacio
+C 0x54FC 0x17B8 y 0x37B8: patron y color del cofre abierto
+C 0x5514 0x1A25: la baldosa del contenido
+L 0x5543 sube_paso  0xF89F++: el contador de pasos dados de la aventura
+L 0x554B mira_el_barril  En la pantalla 5, el barril de la columna 0x60
+C 0x554B solo en la pantalla 5
+C 0x5551 y con el estado 1
+C 0x5557 con dos de marcador ya esta hecho
+C 0x5560 el estado tiene que ser 0
+C 0x556A columna por debajo de 0xA9
+C 0x5570 y fila por encima de 0x65
+C 0x5575 sube el marcador
+C 0x5578 y se cambian dos baldosas de la pantalla 6
+L 0x5585 sube_marcador  0xF8A0++
+L 0x558D escena_de_la_taberna  Lo que pasa en la pantalla 5 al llegar a la barra
+C 0x558D solo en la pantalla 5
+C 0x5593 y con menos de tres de marcador
+C 0x5599 la primera vez hay que pintar la barra
+C 0x55A1 el protagonista tiene que estar en juego
+C 0x55AF columna 0x60
+C 0x55B4 y fila por encima de 0x65
+C 0x55B7 se espera a que el estado llegue a 2
+C 0x55C5 y de paso se voltean los patrones, una de cada dos veces
+C 0x55D5 se cambian seis baldosas de la pantalla 6
+C 0x55D8 0x1F: una fila menos una columna
+C 0x55F0 y dos mas en 0x9406
+L 0x55FD pinta_la_barra  Sube los patrones de la barra a la baldosa 0xF4
+C 0x55FD la primera vez y solo una
+C 0x5601 0x28 bytes: cinco baldosas
+L 0x560D alterna_volteo  Voltea los patrones una vez si, otra no
+C 0x560D 0xF8A5 alterna entre 0 y 1
+C 0x5614 en la primera se voltea...
+C 0x5619 ...y en la segunda se vuelve a dejar como estaba
+L 0x561D voltea_los_patrones  Da la vuelta a los patrones de 0xC102 a 0xC138
+C 0x561D 0x37 bytes: siete baldosas menos una
+L 0x5626 escena_de_la_nave  Lo que pasa en la pantalla 2 al llegar a la nave
+C 0x5626 solo en la pantalla 2
+C 0x562C con el estado 4 ya esta hecho
+C 0x5634 o con la escena ya lanzada
+C 0x563C hace falta el estado 2
+C 0x564A columna 0xBC, fila 0x90
+C 0x5652 se lanza la escena
+C 0x5657 y fuera los sprites
+C 0x565A repinta el letrero de la nave
+C 0x5660 0x50 bytes: diez baldosas
+C 0x5666 y retoca las baldosas del mastil
+C 0x5671 0x1F: una fila menos una columna
+L 0x56A9 paso_de_escena  Un paso de la escena automatica de 0xF8A7
+C 0x56A9 con 0xF8A7 a cero, la escena no ha empezado
+C 0x56B1 los punteros al dia antes de nada
+C 0x56B4 lo que toque en este paso
+C 0x56B7 y un paso mas
+L 0x56BF que_toca_ahora  Elige el paso de escena segun 0xF8A7
+C 0x56BF el numero de paso
+C 0x56C2 paso 1: sube el estado
+C 0x56C7 pasos 2 y 3: dos pixeles a la izquierda
+C 0x56D1 paso 4: baja el estado
+C 0x56D6 paso 5: subir por la escala
+C 0x56DB paso 6: baja el estado
+C 0x56E0 paso 7: bajar por la escala
+C 0x56E5 paso 8: el tramo final
+L 0x56EB espera_al_gatillo  Espera a que se pulse para arrancar la escena
+C 0x56EE con once pasos dados no hay escena que esperar
+C 0x56F2 se mira el gatillo
+C 0x56F7 el protagonista pasa al estado 4
+C 0x56FC punteros al dia
+C 0x5704 y el muñeco se coloca en la columna 0x68, fila 0x10
+C 0x570C con el estado 3
+C 0x570F y arranca la escena
+L 0x5717 paso_de_subida  El muñeco sube por la escala, dos pixeles por vuelta
+C 0x5717 0xF8A9 cuenta los pasos cortos
+C 0x571E cada cuatro...
+C 0x5728 ...0xF8A8 cuenta los largos
+C 0x572F y cada cuatro de esos, dos pasos hacia abajo
+C 0x5748 mientras tanto se repite el paso y se baja
+L 0x5737 dos_a_la_derecha  X += 4 en la ficha
+L 0x5740 paso_atras  0xF8A7--: se repite el paso de escena
+L 0x5757 dos_a_la_izquierda  X -= 4 en la ficha
+L 0x5760 paso_de_bajada  El muñeco baja por la escala
+C 0x5760 0xF8A9 cuenta los pasos cortos
+C 0x5767 cada tres...
+C 0x5771 ...0xF8A8 cuenta los largos
+C 0x5778 y a los ocho, se acaba
+C 0x577D se repite el paso
+C 0x5783 alternando derecha e izquierda
+L 0x578B paso_final  El ultimo tramo de la escena
+C 0x578E 0xF8A8 cuenta hasta once
+C 0x5797 y al llegar, sube el marcador
+C 0x579A los dos contadores a cero
+C 0x57A2 y mientras tanto, cuatro pixeles a la derecha
+L 0x57A8 cuatro_a_la_derecha  X += 4 en la ficha
+L 0x57B1 arranca_la_escena  Con cuatro puntos de marcador, la escena de la nave
+C 0x57B1 hacen falta cuatro de marcador
+C 0x57B7 y que no haya escena en marcha
+C 0x57BD se espera al gatillo
+C 0x57C3 el protagonista pasa al estado 2
+C 0x57CB y aparece en la columna 0x78, fila 0xD8
+C 0x57D3 con la escena en el paso 9: el que la termina
+L 0x57D9 el_gran_salto  En la pantalla 7, el paso al barco
+C 0x57DF hay que pulsar el gatillo
+C 0x57E5 y no haber saltado dieciseis veces ya
+C 0x57FE la ficha del protagonista
+C 0x5807 la baldosa donde esta: si es 0x3F, hay tabla
+C 0x581E dos baldosas de color y una franja de 0x10 en la 0x2FF0
+C 0x5841 y se pintan las siete baldosas del tablon
+C 0x5879 0xAB29 es la ficha del tablon: X 0xF0, Y 0x50
+C 0x5889 el tablon corre hasta la columna 0x1D
+C 0x588C --- retrocede el mapa ancho hasta la columna 0x1D ---
+C 0x5894 dos pasos a la izquierda por vuelta
+C 0x58A1 pantalla 8: la del salto
+C 0x58A6 --- espera a que el muñeco llegue al tablon ---
+C 0x58BA la posicion del tablon pasa a la ficha siguiente
+C 0x58C3 el sprite grande, a la tabla de patrones de sprite
+C 0x58CF y el sprite de mar que toque
+C 0x58DB --- el tablon avanza cuatro pixeles por vuelta ---
+C 0x5904 hasta la columna 0xF0
+C 0x590C y de vuelta a la pantalla 7
+L 0x5918 pinta_el_tablon  Dibuja el tablon con sus catorce piezas de sprite
+C 0x5918 0x1B28: la decima entrada de la tabla de atributos
+C 0x591E Y del tablon
+C 0x5924 X del tablon
+C 0x592A color 10
+C 0x5942 0x28: cinco piezas atras
+C 0x596A 0xF8B3 dice si el tablon lleva remate a un lado o al otro
+C 0x5972 ocho pixeles a la derecha
+C 0x597D 0xA5DD: uno de los sprites de mar
+C 0x5984 patron 6 si no es ese...
+C 0x59A6 ...y patron 11 si lo es
+C 0x5986 --- tres piezas y 0x18 pixeles atras ---
+C 0x599A el color, del que quedo en 0xF882
+C 0x59AB ocho pixeles a la izquierda
+C 0x59B6 0xA60D: otro de los sprites de mar
+C 0x59BD patron 11...
+C 0x59D1 ...o patron 6
+C 0x59BF --- seis piezas seguidas ---
+L 0x59D6 baldosa_de  Convierte la posicion en pixeles de la ficha BC en baldosa
+C 0x59D6 X de la ficha
+C 0x59D7 +4 y dividido entre 8: la columna
+C 0x59E2 0x1800: la tabla de nombres
+C 0x59E7 Y de la ficha
+C 0x59F0 y cada fila son 0x20 baldosas
+B 0x59FB --- la compra en el almacen ------------------------------
+B 0x59FB El almacen de la pantalla 7 tiene los generos puestos en fila
+B 0x59FB por el mapa ancho, cada uno en su tramo de columnas, y lo que
+B 0x59FB se compra es lo que hay donde este el muñeco. Cada compra
+B 0x59FB sube su contador y gasta una unidad de las dieciseis de
+B 0x59FB DINERO, que es lo que lleva 0xF8BA.
+L 0x59FB donde_esta_el_barco  Segun la columna, sube el contador del genero que toca
+C 0x59FB la columna del muñeco...
+C 0x5A07 ...mas el scroll del mapa ancho
+C 0x5A0B menos de 0x18: AGUA
+C 0x5A10 hasta 0x1D: VINO
+C 0x5A15 hasta 0x22: COMIDA
+C 0x5A1A hasta 0x2B: MADERA
+C 0x5A1F y de ahi en adelante, TELA
+C 0x5A25 y la TELA usa el sprite de mar de 0xA60D
+C 0x5A30 0xF8BA lleva la cuenta del dinero gastado
+L 0x5A38 sube_uno  (HL)++ : una unidad mas del genero que sea
+L 0x5A74 pinta_progreso  Marca en el mapa ancho lo que se lleva comprado
+C 0x5A78 dieciseis unidades de dinero en total
+C 0x5A80 0x9807: la segunda fila del mapa ancho
+C 0x5A89 0x41: la fila de abajo y una columna
+L 0x5A91 pinta_franja_inferior  Limpia la franja de texto y escribe lo que toque
+C 0x5A91 0x140 bytes: diez filas de baldosa
+C 0x5A9B y su color, 0x1F
+C 0x5AA6 0xF89C elige el mensaje
+L 0x5AC2 mensaje_puerto  "PUERTO DE PALOS" y "Ano 1492"
+L 0x5ACC escribe_segunda_linea  La segunda linea del mensaje, mas abajo
+C 0x5ACC se retrocede un byte, como en la rutina de arriba
+C 0x5AD0 0x1638: el principio de la franja
+C 0x5AD3 0xA0: veinte baldosas mas abajo
+L 0x5ADA escribe_mensaje  Escribe en la franja de abajo la cadena que apunta HL
+C 0x5ADA se empieza un byte antes: la rutina de 0x5B7F avanza primero
+C 0x5ADE 0x1638: la baldosa donde empieza la franja
+C 0x5AE1 ocho bytes por baldosa
+C 0x5AE4 A dice cuantas baldosas se sangra la linea
+C 0x5AF7 --- una letra por vuelta ---
+C 0x5AFA el 0x0D termina la linea
+C 0x5AFF 0x1BBF es CGTABL, la fuente de la ROM
+C 0x5B05 ocho bytes por caracter
+C 0x5B1C el patron de la letra, a la tabla de patrones
+C 0x5B1F y la baldosa siguiente
+L 0x5B2C mensaje_cartografo  "Juan de la Cosa" y "Cartografo"
+L 0x5B34 mensaje_fraile  "Fray Juan Perez"
+L 0x5B41 mensaje_armador  "Martin Alonso Pinzon" y "Armador"
+L 0x5B4D mensaje_oficio  El oficio que toque segun los pasos dados
+C 0x5B4D 0xF89F son los pasos dados
+C 0x5B50 cuatro pasos: "Piloto"
+C 0x5B55 cinco: "Cocinero"
+C 0x5B5A seis: "Carpintero"
+C 0x5B5F y de ahi en adelante, "Marinero"
+L 0x5B67 mensaje_piloto  "Piloto"
+L 0x5B6F mensaje_cocinero  "Cocinero"
+L 0x5B77 mensaje_carpintero  "Carpintero"
+L 0x5B7F siguiente_letra  Avanza el puntero de la cadena y devuelve la letra
+L 0x5B88 se_acabo  El muñeco se cae al agua y la partida vuelve a empezar
+C 0x5B8A 0xF8C2: la marca de caida, que recorta la figura por abajo
+C 0x5B99 cuatro pixeles mas abajo por vuelta
+C 0x5BA1 hasta la fila 0xA4, ya fuera de la pantalla
+C 0x5BAC y a empezar de cero
+L 0x5BAF fin_de_la_travesia  El desenlace de la pantalla 7, con su animacion
+C 0x5BAF hace falta haber cumplido el requisito de 0xF8B9...
+C 0x5BB5 ...y haber recorrido algun tramo
+C 0x5BCC 0x1AE0: la ultima fila de la tabla de nombres
+C 0x5BDC --- va tapando la pantalla en espiral ---
+C 0x5BE2 0x19: la baldosa que lo tapa todo
+C 0x5BF3 --- elige por donde sigue tapando ---
+C 0x5C0F arriba
+C 0x5C18 a la derecha
+C 0x5C1C abajo
+C 0x5C23 y cuatro direcciones que se van turnando
+C 0x5C33 en las direcciones pares se gasta una fila...
+C 0x5C3D ...y en las impares, una columna
+L 0x5C59 fin_de_la_primera_parte  Monta la pantalla de espera y va a por la segunda
+C 0x5C59 la tabla de nombres de la pantalla que se ve mientras carga
+C 0x5C5C 0x300 bytes: 32 por 24
+C 0x5C65 sus patrones: 0x198 bytes a la baldosa 0x5B
+C 0x5C71 y 0x48 mas a la baldosa 0x8E
+C 0x5C7D el protagonista pasa al estado 4
+C 0x5C85 y se coloca en la columna 0x90, fila 0x78
+C 0x5C91 con el estado 3 y sin fotograma
+C 0x5C98 se dibuja por ultima vez
+C 0x5C9B y se pintan las cifras del resumen
+C 0x5C9E guarda en 0xD6D9-0xD6DE lo conseguido: la segunda parte lo lee en 0x4037
+C 0x5CA2 0xD6D9 <- 0xF8B4, el AGUA
+C 0x5CA7 0xD6DA <- 0xF8B5, el VINO
+C 0x5CAC 0xD6DD, no 0xD6DB: la COMIDA se cruza con la MADERA
+C 0x5CB1 0xD6DB <- 0xF8B7, la MADERA
+C 0x5CB6 0xD6DC <- 0xF8B8, la TELA
+C 0x5CBB 0xD6DE <- 0xF8B9, los MARINEROS: la tripulacion de la travesia
+C 0x5CBF y 0xD6D8, el balanceo, a cero
+C 0x5CBF el DINERO (0xF8BA) no se pasa: se queda en esta primera parte
+C 0x5CC2 (0xD300) vale 0xD369: el bucle del cargador que lee un bloque de cinta
+C 0x5CC5 se salta metiendolo en la pila
+L 0x5CC7 cuelgue  Si la cinta no arranca, aqui se queda
+L 0x5CCA espera_500  Cuenta hasta 500 en 0xF891
+C 0x5CCA 0xF891 es el contador de espera
+C 0x5CD1 0x1F4 = 500 vueltas
+C 0x5CD8 y al llegar se pone a cero para la proxima
+B 0x5CDF ==========================================================
+B 0x5CDF  EL RESUMEN DE LO CONSEGUIDO, Y QUE ES CADA CONTADOR
+B 0x5CDF ==========================================================
+B 0x5CDF Dibujada con tools/dibuja.py, esta pantalla sale con siete
+B 0x5CDF rotulos y siete cifras de dos digitos. La correspondencia
+B 0x5CDF entre cada cifra y su rotulo NO se ha supuesto: el bucle de
+B 0x5CDF aqui abajo pinta las catorce cifras en baldosas seguidas, de
+B 0x5CDF la 188 a la 201, y basta buscar esas baldosas en la tabla de
+B 0x5CDF nombres de 0xC310 para ver bajo que rotulo cae cada una.
+B 0x5CDF Sale esto, y no el orden que uno esperaria:
+B 0x5CDF
+B 0x5CDF   0xF8B4  AGUA      (baldosas 188-189, fila 13 columna 9)
+B 0x5CDF   0xF8B5  VINO      (190-191, fila 18 columna 9)
+B 0x5CDF   0xF8B6  COMIDA    (192-193, fila 8 columna 9)
+B 0x5CDF   0xF8B7  MADERA    (194-195, fila 5 columna 22)
+B 0x5CDF   0xF8B8  TELA      (196-197, fila 12 columna 22)
+B 0x5CDF   0xF8B9  MARINERO  (198-199, fila 17 columna 22)
+B 0x5CDF   0xF8BA  DINERO    (200-201, fila 4 columna 9)
+B 0x5CDF
+B 0x5CDF Las cinco primeras son las mercancias que se compran en el
+B 0x5CDF almacen de la pantalla 7 -y por eso el rotulo de esa pantalla
+B 0x5CDF dice AGUA VINO COM...-: la rutina de 0x59FB mira por que
+B 0x5CDF tramo del mapa ancho va el muñeco y sube el contador que
+B 0x5CDF toca. El DINERO es el unico que se ensena RESTADO DE 16, o
+B 0x5CDF sea lo que queda despues de comprar, y el unico que NO se le
+B 0x5CDF pasa a la segunda parte. MARINERO sale del marcador de
+B 0x5CDF reclutamiento menos dos (0x53AE).
+L 0x5CDF pinta_resumen  El dibujo y las cifras de la pantalla de espera
+C 0x5CDF 0x150 bytes de dibujo a la baldosa 0xCA
+C 0x5CEB 0x25E0: la tabla de colores del segundo tercio
+C 0x5CF7 --- pinta de color 0x1F un tramo de 0x70 bytes por tercio ---
+C 0x5D02 y baja un tercio
+C 0x5D05 hasta 0x3DE0, el final de la tabla de colores
+C 0x5D0C los siete contadores se leen a partir de 0xF8B3...
+C 0x5D12 ...y se pintan a partir de la baldosa 0xBC
+C 0x5D18 --- una cifra por vuelta ---
+C 0x5D1B las cifras de 0 a 9 estan en la baldosa 0x27A...
+C 0x5D25 ...y las de 10 en adelante, en la 0x28A
+C 0x5D28 la parte que sobra de la decena
+C 0x5D2B y donde se pinta
+C 0x5D2E la primera cifra
+C 0x5D3A --- salta hasta la baldosa de la unidad ---
+C 0x5D4D y la segunda cifra
+C 0x5D50 hasta llegar a 0xF8BA, el ultimo contador
+L 0x5D5B pinta_cifra  Sube una cifra a los tres tercios y retrocede
+C 0x5D5B la misma cifra en los tres tercios
+C 0x5D5E 0xFF8: vuelve al tercio de arriba, una baldosa mas alla
+L 0x5D6B siguiente_contador  Devuelve el valor del contador siguiente
+C 0x5D6B avanza al contador de al lado
+C 0x5D72 el septimo y ultimo es 0xF8BA, el DINERO...
+C 0x5D7B ...y ese se ensena restado de 16: lo que queda tras comprar
+L 0x5D81 anima_la_bandera  En la pantalla 2, la bandera del mastil ondeando
+C 0x5D84 solo en la pantalla 2
+C 0x5D87 0xF8C1: una vuelta de cada diez
+C 0x5D95 0xF8BB: el fotograma, de 0 a 2
+C 0x5DAD 0xF8BC: el segundo contador, tambien de 0 a 2
+C 0x5DBD 0x1872: la baldosa de la bandera
+C 0x5DC0 cinco baldosas de separacion entre fotogramas
+C 0x5DCA la baldosa de la bandera se cuenta hacia atras desde 0xC9
+C 0x5DDA la segunda mitad de la bandera, en 0x1874
+C 0x5DE7 y esa hacia atras desde 0xCC
+L 0x5DED avanza_bc_veces  HL += DE, repetido 0xF8BC veces
+L 0x5DF0 avanza_a_veces  HL += DE, repetido A veces
+C 0x5DF0 el numero de pasos se guarda en 0xF883
+C 0x5DF3 con cero pasos, HL se queda como esta
+C 0x5DF6 un paso
+L 0x5DFE anima_el_pajaro  En la pantalla 2, el ave que cruza la escena
+C 0x5E01 solo en la pantalla 2
+C 0x5E04 la primera vez hay que pintar el fondo
+C 0x5E10 0x60 bytes de dibujo a la baldosa 0xC7
+C 0x5E1C --- pinta el ave en su columna ---
+C 0x5E1C 0xF8BF es la columna por la que va
+C 0x5E22 0x1955: la fila por la que cruza
+C 0x5E26 baldosas 0xCF, 0xD0 y 0xD1 o 0xD2
+C 0x5E38 0xF8BE alterna las dos baldosas de la cola: el aleteo
+L 0x5E4D mueve_el_pajaro  Cada veinte vueltas, el ave cambia de columna
+C 0x5E4D 0xF8BD: el contador de vuelo
+C 0x5E54 veinte vueltas por paso
+C 0x5E5D 0xF8C0 dice si va o viene
+C 0x5E7A ida: hasta la columna 3
+L 0x5E8C borra_el_pajaro  Deja la baldosa 0x19 donde estaba el ave
+C 0x5E8F 0x1955: la fila del ave
+C 0x5E93 0x19 es la baldosa vacia
+C 0x5EA1 0x60: el remate de abajo
+L 0x5EA6 cambia_el_sentido  0xF8C0 alterna entre 0 y 1
+C 0x5EA6 0 = el ave va; 1 = vuelve
+C 0x5EAD al llegar a 2 se da la vuelta
+C 0x5EB0 y se pone a cero
+L 0x5EB5 baja_una_fila_pajaro  Una fila mas abajo y la baldosa vacia
+L 0x5EBC musica_de_la_pantalla  Al cambiar de pantalla, cambia lo que suena
+C 0x5EBC 0xF8C6 recuerda para que pantalla es la musica de ahora
+C 0x5EC0 si la pantalla no ha cambiado, no hay nada que hacer
+C 0x5ECA 0xC9 en H.KEYI: un RET, con lo que la musica se para en seco
+C 0x5ECF GICINI deja el PSG mudo
+C 0x5ED2 pantalla 0: el zumbido de fondo
+C 0x5ED9 pantalla 6: el mismo
+C 0x5EDE pantalla 2: la melodia de 0xCB95
+L 0x5EE7 sigue_la_musica  La pantalla no ha cambiado: se mira si toca repetir
+C 0x5EEA en la pantalla 2, cuando la melodia acaba se repite
+C 0x5EF6 en la pantalla 3, el sonido del reloj de arena
+C 0x5EFF a los cien tics del reloj, un aviso
+C 0x5F04 y por debajo de cien, silencio
+L 0x5F08 aviso_del_reloj  El pitido de aviso del reloj de arena
+C 0x5F08 registros 0 y 1: el tono grueso y el fino
+C 0x5F1E registros 6 a 8: ruido y volumen
+C 0x5F2F registros 10 a 12: el envolvente
+L 0x5F3D siguiente_registro  Escribe el registro A y pasa al siguiente
+L 0x5F41 zumbido  El zumbido de fondo de las pantallas 0 y 6
+C 0x5F41 registros 6, 7 y 8: ruido, mezcla y volumen
+C 0x5F54 registros 12 y 13: el envolvente lento
+L 0x5F61 lee_mando  Deja en 0xF894 la direccion del mando o del cursor
+C 0x5F61 el registro 7 del PSG, por si hay que mirar el puerto de mando
+C 0x5F6B primero el cursor del teclado...
+C 0x5F73 ...y si no hay nada, el mando del puerto 1
+L 0x5F80 lee_gatillo  Deja en 0xF8C4 el gatillo o la barra
+C 0x5F8A primero la barra espaciadora...
+C 0x5F92 ...y si no, el boton del mando
+
+D 0x5F9F 0x5FF8 restos_de_montaje  0x59 bytes que no ejecuta nadie. Son copia EXACTA de 0x5F1F-0x5F77, ochenta bytes mas arriba (comprobado byte a byte: 0x5F9F-0x5FE0 contra 0x5F1F-0x5F60, y 0x5FE1-0x5FF7 contra 0x5F61-0x5F77). La copia se corta a media instruccion, en el 0x32 de un `ld (nn),a`. El mismo artefacto sale al final del cargador y al final de la segunda parte.
+F 0x5F9F 8
+
+D 0x5FF8 0x6400 relleno_de_bloque  Los 1032 bytes que sobran del trozo de 0x2400. Desde 0x5FF9 son el patron de ocho bytes 00 FF FF FF FF 00 00 00 repetido 129 veces sin una sola excepcion (comprobado); dibujado es una barra horizontal. Ninguna instruccion del programa los lee. Es la unica de las tres colas de bloque de la cinta que esta VACIA de verdad: la autocorrelacion da el 100 % en todos los multiplos de 8, o sea que no lleva ni un bit de informacion. Aun asi comparte el esqueleto de las otras dos: leida desde 0x5FFA los registros de ocho son cuatro bytes acabados en F y cuatro acabados en 0, la misma fase (resto 2 al dividir por 8) que 0x5C7A y 0xCCDA de la segunda parte.
+F 0x5FF8 8

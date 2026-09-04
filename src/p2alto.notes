@@ -1,0 +1,97 @@
+# SEGUNDA PARTE, trozo alto: 0x8000-0xD2FF. Todo son datos: aqui no hay una
+# sola instruccion, y el trazador lo confirma (cero bytes de codigo).
+#
+# Como en la primera parte, los limites salen de las cuentas del codigo y no de
+# una suposicion: cada bloque termina justo donde empieza el siguiente.
+
+B 0x8000 ==========================================================
+B 0x8000  EL DESCUBRIMIENTO DE AMERICA - segunda parte, los datos
+B 0x8000 ==========================================================
+B 0x8000 Dos juegos de fuente -uno para el barco y otro para la carta
+B 0x8000 oceanica-, el mapa del barco entero, los sprites de la
+B 0x8000 tripulacion, las dos pantallas fijas y los mensajes.
+B 0x8000
+B 0x8000 tools/dibuja.py monta el mapa del barco desde estos bytes y
+B 0x8000 sale un corte de la carabela de 1024x416 pixeles: cubiertas,
+B 0x8000 escalas, mastiles, velas y bodegas.
+
+D 0x8000 0x8800 fuente_barco_patrones  Tabla de patrones de la parte del barco: 256 baldosas de 8 filas. La rutina de 0x40FE la vuelca a los tres tercios.
+F 0x8000 8
+
+D 0x8800 0x9000 fuente_barco_colores  Tabla de colores paralela: un byte por FILA de baldosa. Tambien a los tres tercios (0x4119).
+F 0x8800 8
+
+D 0x9000 0xAA00 mapa_del_barco  El escenario entero: 128 baldosas de ancho por 52 de alto (0x1A00 bytes). La rutina de 0x4285 recorta una ventana de 32x24 con la columna 0xF88F y la fila 0xF890, y el paso entre filas es 0x80, que es lo que dice el ancho. Dibujado sale el corte de la carabela: la cubierta con la borda y los faroles, tres mastiles con sus velas y sus escalas de jarcia, y por debajo tres crujias de camarotes y bodega.
+F 0x9000 128
+
+D 0xAA00 0xAA10 sprite_parado  Media figura de sprite, 16 bytes: los dos cuadrantes de la izquierda de un patron de 16x16. La rutina de 0x4993 la usa cuando el muñeco no anda.
+F 0xAA00 8
+
+D 0xAA10 0xAA60 sprite_pasos  Cinco medias figuras mas de 16 bytes: los fotogramas del paso, que la rutina de 0x496C elige con el campo 4 de la ficha del barco. El indice avanza de 0x10 en 0x10 desde 0xAA10.
+F 0xAA10 8
+
+D 0xAA60 0xB000 sprites_por_barco  CUATRO juegos de sprites de 0x168 bytes, uno por cada barco de la flota. El indice lo aplica la rutina de 0x40D5 con `de = 0x168` y el numero de barco 0xF897; cuatro pasos desde 0xAA60 caen justo en 0xB000, que es donde empieza el bloque siguiente.
+F 0xAA60 8
+
+D 0xB000 0xB02C fichas_de_barco  Cuatro fichas de once bytes, una por barco (0x40C6 indexa con `de = 0x0B` y el numero de barco). Los campos que usa el codigo (rutina de 0x4122, que indexa con A-1): 1 = X, 2 = Y, 3 = estado, 4 = fotograma, 5 = parpadeo.
+F 0xB000 11
+
+D 0xB02C 0xB058 posiciones_guardadas  Once entradas de cuatro bytes -X, Y y dos mas- indexadas por la suma del barco (0xF897) y del tripulante (0xF898); la rutina de 0x4AE2 la escribe y la de 0x4B44 la vuelve a leer. Once entradas de cuatro son los 0x2C bytes que el arranque copia desde 0xCBC6 en 0x4023.
+F 0xB02C 4
+
+D 0xB058 0xB358 copia_de_pantalla  Zona de trabajo, no dato de la cinta: la rutina de 0x4285 se baja aqui la tabla de nombres entera con LDIRMV, la retoca y la vuelve a subir de golpe en 0x50C7. Lo que trae la cinta en estos 768 bytes se pisa en la primera vuelta del bucle. Aun asi ocupa sitio en la cinta y por eso hay que declararlo.
+F 0xB058 32
+
+D 0xB358 0xB658 carta_nombres  Tabla de nombres 32x24 de la pantalla de la carta oceanica (0x585F y 0x5BD5). Dibujada con la fuente de 0xB958 sale el rotulo "MAPA OCEANICO", los marcos de "DIAS", "ESTADO MORAL" y "ESTADO FISICO", el pie "VELOCIDAD DEL VIENTO:" y la costa del viejo mundo por la derecha. La rutina de 0x5B72 pinta el rastro del barco encima, tomando 0xB3A1 -que es esta misma tabla, fila 2 columna 9- como esquina de la carta.
+F 0xB358 32
+
+D 0xB658 0xB958 final_nombres  Tabla de nombres 32x24 de la pantalla con la que se acaba la travesia: la que pone la rutina de 0x5AF0 cuando hay desastre, y sobre la que escribe el mensaje. Dibujada sale el rotulo "FINAL DE LA TRAVESIA" sobre el mar y la tierra. La llegada buena (0x5BC2) NO usa esta: usa otra vez la carta oceanica de 0xB358.
+F 0xB658 32
+
+D 0xB958 0xC158 fuente_carta_patrones  El segundo juego de patrones, el de la carta y las pantallas de texto: 256 baldosas de 8 filas, que la rutina de 0x5889 sube a los tres tercios.
+F 0xB958 8
+
+D 0xC158 0xC958 fuente_carta_colores  Su tabla de colores, tambien a los tres tercios (0x58A4).
+F 0xC158 8
+
+D 0xC958 0xC968 puestos_de_trabajo  Ocho pares (columna, fila) -0x0927, 0x1027, 0x1A27, 0x0929, 0x1029, 0x1A29, 0x092B, 0x102B- por los que va pasando la tripulacion. El puntero 0xF8AC arranca aqui (0x4B97) y la rutina de 0x4E72 avanza de dos en dos; el arranque llama ocho veces a la rutina de tripulante (0x4B9D-0x4BB2), que son justo los ocho pares.
+F 0xC958 2
+
+D 0xC968 0xC98C efectos_de_casilla  Nueve entradas de cuatro bytes, indexadas por el valor de la casilla del oceano menos 3 (0x52BC). Los cuatro bytes se copian tal cual a 0xF8B3-0xF8B6. Nueve por cuatro son los 0x24 bytes que hay hasta la carta.
+F 0xC968 4
+
+D 0xC98C 0xCB1C carta_del_oceano  La carta de la travesia: 20 columnas por 20 filas, un byte por casilla. La rutina de 0x527F la lee con `de = 0x14` -la anchura- y los indices 0xF8B7 (columna) y 0xF8B8 (fila), los dos limitados a 0x13 en 0x530A y 0x5324. Veinte por veinte son los 0x190 bytes que hay hasta 0xCB1C. El valor de la casilla acaba en 0xF8B9 y decide que pasa ese dia.
+F 0xC98C 20
+
+D 0xCB1C 0xCB1E ultimo_punto  La ultima casilla anotada de la ruta. La escribe 0x52E3 y la vuelve a leer 0x5555.
+F 0xCB1C 2
+
+D 0xCB1E 0xCB96 rastro_de_la_ruta  Zona de trabajo donde se va apuntando la ruta seguida, dos bytes por punto. El puntero es 0xF8AF, que empieza aqui (0x54EA y 0x52DA) y crece con cada punto nuevo (0x5472); 0x5808 lo hace retroceder. Caben 60 puntos.
+F 0xCB1E 2
+
+D 0xCB96 0xCBA6 colores_de_noche_1  0x10 bytes que la rutina de 0x57EA sube a la VRAM 0x2328, o sea a la tabla de COLORES: es lo que oscurece la escena cuando cae la noche.
+F 0xCB96 8
+
+D 0xCBA6 0xCBC6 colores_de_noche_2  0x20 bytes mas a la VRAM 0x2378 (0x57FF).
+F 0xCBA6 8
+
+D 0xCBC6 0xCBF2 posiciones_iniciales  Los 0x2C bytes que el arranque copia a 0xB02C (0x4023): las once entradas de cuatro bytes con las posiciones de partida.
+F 0xCBC6 4
+
+D 0xCBF2 0xCC60 mensajes_de_desastre  Cinco mensajes de 22 caracteres, sin terminador: "GRAVE  DESMORALIZACION", "AGOTADAS   PROVISIONES", "VIA DE AGUA  SIN TAPAR", "FUEGO  SIN  CONTROLAR ", "VELA PRINCIPAL RASGADA". La rutina de 0x5B11 elige con `de = 0x16` y el codigo de desastre 0xF8DE, que va de 1 a 5; la base del indice es 0xCBDC, o sea 0x16 antes que el primer mensaje, asi que el mensaje 1 es el primero. Los patrones salen de CGTABL (0x1BBF).
+F 0xCBF2 22
+
+D 0xCC60 0xCC74 pie_de_final_1  0x14 baldosas a la VRAM 0x1A86 (0x5B8F): la primera de las tres lineas del pie de la pantalla de final.
+F 0xCC60 20
+
+D 0xCC74 0xCC88 pie_de_final_2  0x14 baldosas a la VRAM 0x1AA6 (0x5B9B).
+F 0xCC74 20
+
+D 0xCC88 0xCC9C pie_de_final_3  0x14 baldosas a la VRAM 0x1AC6 (0x5BA7).
+F 0xCC88 20
+
+D 0xCC9C 0xCCD8 columna_de_final  Veinte filas de tres baldosas que la rutina de 0x5BED sube una a una a partir de la VRAM 0x1846, bajando 0x20 cada vez; el bucle para cuando el puntero llega a 0xCCD8, que es lo que fija el final del bloque.
+F 0xCC9C 3
+
+D 0xCCD8 0xD300 relleno_de_bloque  Los 1576 bytes que sobran del trozo de 0x5300, y que ninguna instruccion lee. Llevan el MISMO patron que la cola del trozo bajo: grupos de ocho con cuatro bytes de nibble bajo F y cuatro de nibble bajo 0 (medido: 788 acaban en F y 787 en 0). Aqui, ademas, la forma dominante es 00 00 FF FF FF FF 00 00, que es exactamente lo que la primera parte deja en su propia cola. Que sea una tabla de colores sobrante es lo que sugiere la forma, pero la medida lo desmiente: el nibble bajo es 0 o F en el 100 % de los bytes, y las tablas de color de este juego se quedan entre el 0 % y el 36,5 %. Ni es lo que dejo la primera parte en estas direcciones: solo coincide el 4,1 %, y la primera parte trae ahi la imagen del cargador. La medida que la descarta del todo es la fase: los grupos de ocho NO estan alineados a 8. Con la regla "las cuatro primeras acaban en F y las cuatro ultimas en 0", se cumple en el 100 % de los bytes empezando en 0xCCDA y solo en el 50 % en la direccion 8-alineada 0xCCD8; los registros caen en direcciones con resto 2 al dividir por 8, y una tabla de colores de SCREEN 2 esta alineada a 8 por construccion. Las colas de 0x5C7A de la segunda parte y 0x5FFA de la primera llevan la MISMA fase, tambien al 100 %: las tres salen del mismo sitio. Contra los dos volcados de VRAM de openMSX no hay una sola coincidencia de 32 bytes, y dibujada a anchura 32, 40, 48 y 64 solo salen franjas verticales. Queda como pregunta abierta; la pista viva es el desfase de dos bytes.
+F 0xCCD8 8

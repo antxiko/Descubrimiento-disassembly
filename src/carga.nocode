@@ -1,0 +1,11 @@
+# Todo lo que va delante del codigo del cargador son datos que el propio
+# cargador vuelca a la VRAM antes de tocar la cinta, y se ve en su codigo:
+#
+#   0xD312-0xD330  copia 0xC000 tres veces (0x800 cada una) a la tabla de
+#                  patrones de los tres tercios -> 0xC000-0xC7FF es la fuente
+#   0xD321-0xD330  copia 0xC800 tres veces a la tabla de colores
+#   0xD330-0xD339  copia 0xD000, 0x300 bytes, a la tabla de nombres
+#
+# Los rangos van con el extremo derecho EXCLUSIVO.
+
+0xC000 0xD300

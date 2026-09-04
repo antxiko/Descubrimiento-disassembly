@@ -1,0 +1,1046 @@
+# SEGUNDA PARTE, trozo bajo: 0x4000-0x63FF. Aqui vive todo el programa.
+#
+# Formato de las directivas, en tools/mkasm.py:
+#   L dir nombre  comentario     etiqueta
+#   C dir comentario             comentario al final de la linea
+#   B dir texto                  cabecera antes de esa direccion
+#   D ini fin nombre  texto      rango de datos, extremo derecho EXCLUSIVO
+#   F dir anchura                bytes (o wN palabras) por linea del volcado
+
+B 0x4000 ==========================================================
+B 0x4000  EL DESCUBRIMIENTO DE AMERICA - segunda parte, el programa
+B 0x4000 ==========================================================
+B 0x4000 El segundo bloque sin cabecera de la cinta, con el mismo
+B 0x4000 reparto que el primero: 0x2400 bytes aqui y 0x5300 a 0x8000.
+B 0x4000 Ocupa LAS MISMAS direcciones que la primera parte, que para
+B 0x4000 entonces ya no existe.
+B 0x4000
+B 0x4000 Aqui empieza la travesia. El escenario es un corte del barco
+B 0x4000 -128 baldosas de ancho por 52 de alto, en 0x9000- por el que
+B 0x4000 se mueve la tripulacion, y hay ademas una pantalla de mapa
+B 0x4000 oceanico con los dias, el estado moral y el fisico.
+B 0x4000
+B 0x4000 Lo primero que hace, en 0x4037, es leer los seis bytes que la
+B 0x4000 primera parte dejo en 0xD6D9: ese es todo el traspaso entre
+B 0x4000 las dos mitades del juego.
+
+D 0x4000 0x4002 firma  Los caracteres 'A' y 'B', igual que en la primera parte. No los lee nadie.
+F 0x4000 2
+
+D 0x4002 0x4004 punto_de_entrada  La palabra 0x401F: el cargador la lee en 0xD3AD con `ld hl,(0x4002)` y salta ahi.
+F 0x4002 w1
+
+D 0x4004 0x4010 hueco_de_cabecera  Doce ceros entre la cabecera y el codigo.
+F 0x4004 12
+
+B 0x4010 --- rutina de servicio: la VRAM entera de una vez -------
+B 0x4010 La misma que abre la primera parte, byte a byte. No la llama
+B 0x4010 nadie.
+L 0x4010 vuelca_vram_entera  Apaga la pantalla y copia 0x8000-0xBFFF a la VRAM
+C 0x4010 DISSCR
+C 0x401C LDIRVM: 0x4000 bytes a partir de la direccion 0 de VRAM
+
+B 0x401F =========== ARRANQUE DE LA SEGUNDA PARTE ===============
+L 0x401F principal  Punto de entrada del bloque
+C 0x401F la pila, en lo alto de la zona libre
+C 0x4023 las fichas de los barcos, de la copia intacta de 0xCBC6
+C 0x402E borra la zona de variables, de 0xF87F a 0xF91E
+C 0x4037 los seis bytes que dejo la primera parte en 0xD6D9: lo comprado alli
+C 0x403A van a 0xF39A-0xF39F, y ahi se gastan durante la travesia:
+C 0x403A   0xF39A  AGUA      se bebe primero (0x5A70)
+C 0x403A   0xF39B  VINO      la reserva de bebida (0x5A7E)
+C 0x403A   0xF39C  MADERA    tapa la via de agua (0x51F4)
+C 0x403A   0xF39D  TELA      apaga el fuego y remienda la vela (0x51DE)
+C 0x403A   0xF39E  COMIDA    se gasta aparte, en su propio ciclo (0x5A94)
+C 0x403A   0xF39F  MARINEROS la tripulacion, y por tanto cuantos hay
+C 0x4042 0xF39F es cuantos van a bordo
+C 0x4045 con menos de cinco, la moral empieza tocada
+C 0x404A 0xF8D5: dos tramos de moral perdidos de salida
+L 0x404F pon_valores_de_partida  Deja las variables como tienen que empezar
+C 0x404F 0xF8A2: el tercer barco con la vela puesta
+C 0x4054 0xF8A6 y 0xF8AA, a uno
+C 0x405A 0xF8A4: cinco
+C 0x405F 0xF8A9: tres
+C 0x4064 0xF8C9: la casilla 0x1E1C, la primera orden
+C 0x406A 0xF8CC: la casilla 0x206E, la segunda
+C 0x4070 0xF8B7 y 0xF8B8: la casilla de salida en la carta, la 0x13,7
+C 0x4076 se lee la casilla del oceano...
+C 0x4079 ...y se aplica lo que traiga
+C 0x407C se coloca a la tripulacion
+C 0x407F y se pinta la ventana
+C 0x4082 0xF8CE: el color del cielo de salida
+C 0x4087 0xF8D0: la fuente de dia
+C 0x408B SCREEN 2
+C 0x4093 --- el bucle principal de la travesia ---
+C 0x4090 primera pintada de la fuente
+L 0x4093 bucle_principal  Catorce llamadas por vuelta, y a empezar otra vez
+C 0x4093 la ventana del barco
+C 0x4096 el muñeco
+C 0x4099 la llegada
+C 0x409C las teclas de orden
+C 0x409F el balanceo
+C 0x40A2 el reloj
+C 0x40A5 la ruta en la carta
+C 0x40A8 los puntos de ruta
+C 0x40AB la tecla que da orden
+C 0x40AE la tecla que la anula
+C 0x40B1 la luz de aviso
+C 0x40B4 el color del cielo
+C 0x40B7 la llegada a puerto
+C 0x40BA el desastre, si lo hay
+L 0x40C0 apunta_al_barco  Recalcula los punteros que dependen del barco en curso 0xF897
+C 0x40C0 0x3800: la tabla de patrones de sprite
+C 0x40C6 ficha del barco: once bytes por barco, cuatro barcos
+C 0x40CF se guarda para quien la necesite
+C 0x40D5 sprites del barco: 0x168 bytes por barco
+L 0x40E5 avanza_n_veces  HL += DE, repetido (0xF897) veces
+C 0x40E5 0xF897 es el barco en curso
+C 0x40E8 --- un paso por barco ---
+C 0x40EB con cero pasos, HL se queda como esta
+L 0x40F6 borra_hasta  Pone a cero de HL a DE
+C 0x40F9 DCOMPR compara HL con DE
+L 0x40FE carga_fuente  Sube los 0x800 de patrones y los 0x800 de colores a los tres tercios
+C 0x40FE 0x800 bytes: 256 baldosas de ocho filas
+C 0x4104 a la tabla de patrones
+C 0x410A los patrones, en 0x8000
+C 0x4113 y a la tabla de colores
+C 0x4119 los colores, en 0x8800
+L 0x4122 campo_del_barco  Devuelve el byte A-1 de la ficha del barco en 0xF887
+C 0x4122 los campos se cuentan desde 1
+C 0x4126 la ficha del barco en curso
+C 0x412A y el campo pedido
+L 0x412C parpadeo  Alterna 0xF8B1 cada tres vueltas: el balanceo de los muñecos
+C 0x412C 0xF8B2 cuenta las vueltas
+C 0x4133 una de cada tres
+C 0x413A 0xF8B1 va y viene entre 0 y 1
+L 0x4149 baja_cuatro  (HL) += 4
+L 0x414E sube_cuatro  (HL) -= 4
+B 0x4153 --- por donde se puede andar -----------------------------
+B 0x4153 A diferencia de la primera parte, aqui no hay una lista de
+B 0x4153 baldosas solidas por pantalla sino UNA sola, porque el
+B 0x4153 escenario es un unico mapa: el corte del barco. Lo que
+B 0x4153 devuelve la rutina no es "si o no" sino un tipo de terreno,
+B 0x4153 porque con la escalera y con el mastil hay que hacer cosas
+B 0x4153 distintas que con el suelo.
+L 0x4153 tipo_de_baldosa  Clasifica la baldosa que hay bajo (0xF899, 0xF89A)
+C 0x4153 devuelve 0 = se puede pisar, 1 = suelo, 3 = pared, 4 = escalera, 5 = especial
+C 0x4156 se guarda el numero de baldosa para las comprobaciones de abajo
+C 0x4159 0x0A, 0x0D, 0x09, 0x0F, 0x07, 0x08, 0x10, 0x11 y 0x0E: suelo
+C 0x4186 0x27: el borde de una cubierta
+C 0x418B 0x1B: la escalera
+C 0x4190 0x33: el mastil
+C 0x4195 0x34: la borda
+C 0x419A 0x31, 0xA4, 0xA3, 0x91, 0x5F, 0x0C, 0x6D, 0x4A y 0xB8: pared
+C 0x41C7 0xFB y 0xFC: dos baldosas mas de suelo
+C 0x41D1 0xFA y 0xF9: la baldosa que suma un punto
+C 0x41DB por lo demas, se puede pasar
+L 0x41DD terreno_1  Suelo
+L 0x41E0 terreno_2  Escalera vista de frente
+L 0x41E3 terreno_3  Pared
+L 0x41E6 terreno_4  Escalera por la que se sube
+L 0x41E9 terreno_5  Terreno especial
+L 0x41EC mira_la_escalera  La baldosa 0x1B solo es escalera si se viene desde arriba
+C 0x41EC 0xF891 es la direccion del mando; 7 es la izquierda
+C 0x41F5 mira la baldosa que hay justo antes
+C 0x41FA otra escalera: entonces si se puede subir
+C 0x41FF 0xF89B dice si el muñeco esta trepando
+L 0x420A mira_el_mastil  La baldosa 0x33 solo se trepa si se viene desde abajo
+C 0x420A 0xF891 a 3 es la derecha
+C 0x4213 la baldosa siguiente
+C 0x4216 con otra escalera detras, se trepa
+L 0x4226 mira_la_borda  La 0x34 se pasa solo si no se esta trepando
+L 0x4230 punto_de_bonus  Las baldosas 0xF9 y 0xFA suman en 0xF8AB
+L 0x423A baldosa_en  Lee de la VRAM la baldosa de la columna 0xF899 y la fila 0xF89A
+C 0x423A 0xF899 es la X en pixeles...
+C 0x423D ...que dividida entre ocho da la columna
+C 0x4246 0x1800: la tabla de nombres
+C 0x424A y 0xF89A la Y, con el mismo apaño
+C 0x4253 cada fila son 0x20 baldosas
+C 0x4256 --- baja tantas filas como haga falta ---
+C 0x4258 y RDVRM devuelve el numero de baldosa
+L 0x4260 vuelca_tres_tercios  Copia (0xF87F) a (0xF881) y repite en +0x800 y +0x1000
+C 0x4260 primer tercio
+C 0x4266 segundo
+C 0x426C tercero, por caida
+L 0x426C copia_vram  LDIRVM con los tres punteros de 0xF87F, 0xF881 y 0xF883
+L 0x427A baja_un_tercio  Suma 0x800 al destino en VRAM
+C 0x427D basta con sumar 8 al byte alto
+L 0x4285 pinta_ventana  Recorta 32x24 baldosas del mapa del barco y las sube a la VRAM
+C 0x4285 primero se baja la tabla de nombres de la VRAM a 0xB058 para trabajar
+C 0x4292 LDIRMV: de la VRAM a la RAM
+C 0x4295 el montaje se hace con la interrupcion cerrada
+C 0x4296 el mapa esta en 0x9000; 0xF88F es la columna y 0xF890 la fila de arriba
+C 0x42A0 el mapa tiene 128 baldosas de ancho: por eso el paso entre filas es 0x80
+C 0x42AC --- baja tantas filas como diga 0xF890 ---
+C 0x42AF 0xF885 cuenta las filas copiadas
+C 0x42B6 --- una fila por vuelta ---
+C 0x42BD 32 baldosas: lo que se ve de ancho
+C 0x42C2 en el mapa la fila siguiente esta 0x80 mas alla...
+C 0x42CC ...pero en la pantalla, solo 0x20
+C 0x42DD veinticuatro filas
+C 0x42E2 y se sube todo de una vez
+B 0x42E5 --- el muñeco por el barco ------------------------------
+L 0x42E5 mueve_a_la_tripulacion  Anima y desplaza al muñeco segun el mando
+C 0x42E5 punteros al dia
+C 0x42E8 la direccion del mando
+C 0x42EB 1 = arriba
+C 0x42F0 3 = derecha
+C 0x42F5 5 = abajo
+C 0x42FA 7 = izquierda
+C 0x42FF sin direccion, el fotograma se queda a cero
+C 0x430E --- arriba ---
+C 0x4318 sube si la baldosa de encima lo permite
+C 0x4324 el fotograma del paso avanza de 0 a 3...
+C 0x4331 ...o retrocede, segun hacia donde se ande
+C 0x4346 --- abajo ---
+C 0x435F --- izquierda ---
+C 0x4378 --- derecha ---
+C 0x4391 al andar de verdad, un fotograma mas
+L 0x43A2 anda_hacia_arriba  Sube ocho pixeles o trepa, si la baldosa deja
+C 0x43A2 trepando se sube por otro sitio
+C 0x43AA la columna del muñeco, ocho pixeles a la izquierda
+C 0x43B6 y la fila, 0x24 mas abajo: los pies
+C 0x43BB que hay ahi
+C 0x43C1 si es mastil, se mira si se puede trepar
+C 0x43CC terreno libre: no hay nada que hacer
+C 0x43CF terreno 4: escalera, y entonces se trepa
+C 0x43DE si va hacia la derecha, se le corrige
+C 0x43E1 sube ocho pixeles
+C 0x4421 --- el muñeco esta al borde de la ventana ---
+C 0x4426 baldosa 8: por ahi no se sube
+C 0x4429 bit 2: la columna esta a media baldosa
+C 0x442E 0xF88F a cero: la ventana ya esta al borde
+C 0x4436 por encima de la columna 0x50 no se corre
+C 0x443C y si no, se corre una columna
+L 0x43EA empieza_a_trepar  Pone al muñeco en modo escalada
+C 0x43EA 0xF89B: trepando
+C 0x43EF 0xF89C: por que lado
+C 0x43FA la fila, 0x2C mas abajo
+C 0x4402 con terreno libre, se baja
+C 0x4414 y si no, se sube
+L 0x4443 anda_hacia_abajo  Baja ocho pixeles, o corre la ventana si toca
+C 0x4443 trepando se baja por otro sitio
+C 0x444B la columna, 0x10 a la derecha
+C 0x4457 y la fila, 0x24 mas abajo
+C 0x445F terreno libre: nada que hacer
+C 0x4462 terreno 4: escalera
+C 0x44B7 --- el muñeco esta en el borde de la ventana ---
+C 0x44C1 0x60 es el tope del scroll a la derecha
+C 0x44CA por debajo de la columna 0xB0 no se corre la ventana
+C 0x44CF y si no, se corre una columna
+L 0x447D empieza_a_bajar  Pone al muñeco en modo escalada hacia abajo
+C 0x447D 0xF89C a cero: agarrado por el otro lado
+C 0x4481 0xF89B: trepando
+C 0x4486 la columna, 0x18 a la derecha
+C 0x448E y la fila, 0x28 mas abajo
+C 0x4495 que hay ahi
+C 0x449A con terreno libre, se baja
+C 0x44A2 bit 2: media baldosa
+C 0x44A7 y si no, se sube
+L 0x44D6 anda_a_la_izquierda  Ocho pixeles a la izquierda, o corre la ventana
+C 0x44D6 trepando no se anda
+C 0x44DE la columna del muñeco
+C 0x44E6 y la fila, 0x20 mas abajo
+C 0x44EE con la columna en un multiplo impar de cuatro, se ajusta
+C 0x44F3 terreno 1 es suelo: por ahi no se pasa
+C 0x44F9 ocho pixeles mas alla
+C 0x44FE --- mira otra vez ---
+C 0x450D que baldosa hay ahi
+C 0x4510 0x33 es el mastil: no se pasa
+C 0x451D 0xF890 a cero: la ventana ya esta arriba del todo
+C 0x4525 por debajo de la fila 0x50 no se corre
+C 0x452B y si no, se sube una fila
+L 0x4537 anda_hacia_abajo_libre  Ocho pixeles hacia abajo, o corre la ventana
+C 0x4537 trepando no se anda
+C 0x4547 la fila, 0x28 mas abajo
+C 0x4554 terreno 1 es suelo
+C 0x4571 0x33 es el mastil
+C 0x457E 0x1C es el tope del scroll hacia abajo
+C 0x4586 por encima de la fila 0x70 no se corre
+L 0x4590 repinta  Recompone la ventana y repone los punteros
+L 0x459B corre_ventana_izquierda  Una columna del mapa hacia la izquierda
+C 0x45A5 0xF88F a cero: ya esta al borde
+C 0x45AD por encima de la columna 0x50 no se corre
+L 0x45BA sube_ocho  (HL) -= 8
+L 0x45BF baja_ocho  (HL) += 8
+L 0x45C4 corre_ventana_derecha  Una columna del mapa hacia la derecha
+C 0x45CE 0x60 es el tope
+C 0x45D6 por debajo de la columna 0xB0 no se corre
+L 0x45E3 corre_ventana_arriba  Una fila del mapa hacia arriba
+C 0x45E3 el campo 2 de la ficha: la Y
+C 0x45E8 bit 2: si no esta a media baldosa, se sube
+C 0x45ED 0xF890 a cero: ya esta arriba del todo
+C 0x45F5 por encima de la fila 0x50 no se corre
+C 0x45FB y si no, una fila menos
+L 0x4602 corre_ventana_abajo  Una fila del mapa hacia abajo
+C 0x4602 el campo 2 de la ficha: la Y
+C 0x4607 bit 2: si esta a media baldosa, se baja
+C 0x460C 0x1C es el tope
+C 0x4614 por encima de la fila 0x70 no se corre
+C 0x461A y si no, una fila mas
+L 0x4621 trepa_hacia_arriba  El muñeco sube por la escala o el mastil
+C 0x4624 0xF89C dice por que lado esta agarrado
+C 0x4629 0xF8AE cuenta los tramos ya trepados
+C 0x4638 un tramo mas
+C 0x4641 la columna, ocho a la izquierda
+C 0x464D y la fila, 0x24 mas abajo
+C 0x4652 terreno 4: escalera; se sigue trepando
+C 0x4671 y si no, se suelta y se pone de pie
+L 0x4681 trepa_hacia_abajo  El muñeco baja por la escala o el mastil
+C 0x4681 0xF89C dice por que lado esta agarrado
+C 0x4688 0xF8AE cuenta los tramos ya trepados
+C 0x468B con menos de tres, se sigue igual
+C 0x468E se cambia de lado
+C 0x4693 y se reinicia la cuenta de tramos
+C 0x4696 un tramo mas
+C 0x4699 se corre la ventana si hace falta
+C 0x469F la columna, ocho a la derecha
+C 0x46AB y la fila, 0x24 mas abajo
+C 0x46B0 terreno 4: escalera; se sigue
+C 0x46B8 se prueba ocho pixeles mas alla
+C 0x46CF y al acabar, se suelta
+C 0x46D6 tres pasos a la derecha para dejarle de pie
+L 0x46E2 ocho_a_la_derecha  0xF899 += 8: la baldosa de al lado
+L 0x46EB cuenta_tramo  0xF8AE++: los tramos trepados
+B 0x46F0 --- el dibujo del muñeco --------------------------------
+B 0x46F0 Igual que en la primera parte: dieciseis piezas de sprite de
+B 0x46F0 8x8 colocadas a mano, y por eso hay una escalerilla de
+B 0x46F0 rutinas que no hacen mas que mover el cursor.
+L 0x46F0 pinta_al_marinero  Deja al muñeco en su sitio, con su sprite y su color
+C 0x46F0 punteros al dia
+C 0x46F3 el campo 3 de la ficha es el estado
+C 0x46F8 estado 2: cayendo
+C 0x46FD estado 0: quieto
+C 0x4703 0xD6D8 sobrevive entre las dos partes del juego
+L 0x470B coloca_la_figura  Deja el sprite base donde toca segun el estado
+C 0x4710 estado 3: la figura no se mueve de sitio
+C 0x4716 estado 1: la variante de 0x47F5
+C 0x4721 0xF0: el desplazamiento hasta el sprite de esta postura
+C 0x472B 0x78: la altura de la figura
+C 0x4731 sube el sprite a la VRAM
+C 0x4734 elige el patron que toca
+C 0x4737 y el brazo
+C 0x473A 0x1B00: la tabla de atributos de sprite
+C 0x4740 0xF881 cuenta las piezas ya puestas
+C 0x4744 X e Y del muñeco, de su propia ficha
+C 0x4750 y a partir de aqui, las dieciseis piezas
+C 0x4753 los pies
+C 0x4759 las piernas
+C 0x4768 el cuerpo
+C 0x477A la cabeza
+C 0x4789 y los brazos
+L 0x47A7 ocho_abajo  Y += 8
+L 0x47B0 ocho_arriba  Y -= 8
+L 0x47B9 dieciseis_derecha  X += 0x10
+L 0x47C2 dieciseis_izquierda  X -= 0x10
+L 0x47CB pinta_cayendo  Variante del dibujo cuando el estado vale 2
+C 0x47CB el campo 5 es el parpadeo
+L 0x47E0 pinta_quieto  Variante del dibujo cuando el estado vale 0
+C 0x47E0 el campo 5 de la ficha
+C 0x47E5 sin parpadeo se alterna la figura
+C 0x47EA y 0xD6D8 va y viene entre las dos posturas
+L 0x47FB fila_de_cuatro  Cuatro piezas de sprite en fila y vuelta al principio
+C 0x47FB patron base + 6
+C 0x4803 patron base + 7, tres veces
+C 0x4811 y la X vuelve 0x20 pixeles atras
+L 0x481A fila_de_dos  Dos piezas de sprite en fila
+C 0x481A patron base + 8
+C 0x4825 y la X vuelve 0x10 atras
+L 0x482D remate_de_figura  Las piezas sueltas: la cabeza y los brazos
+C 0x482D cinco pixeles a la derecha...
+C 0x4835 ...y cuatro hacia abajo
+C 0x483D patron base + 9
+C 0x4845 ocho pixeles atras
+C 0x484D patron base + 10
+C 0x4855 un pixel atras
+C 0x485C patron base + 11
+C 0x4864 y el color, del campo 1 de la ficha
+L 0x4871 pieza_suelta  Una pieza de sprite y ocho pixeles atras
+C 0x4871 patron base + 7
+C 0x4879 ocho pixeles a la izquierda
+L 0x4881 ultima_pieza  La ultima pieza de la figura
+L 0x488E pon_pieza  Escribe una entrada de la tabla de atributos: Y, X, patron y color
+C 0x488E 0xF882 es el numero de patron
+C 0x4891 la Y del sprite pasa a ser la fila del mapa...
+C 0x4897 ...y la X, la columna
+C 0x489D el campo 1 de la ficha
+C 0x48A7 con cuatro de diferencia, se afina medio pixel
+C 0x48B4 y con la columna en un multiplo impar de cuatro, tambien
+C 0x48C1 terreno 3 es pared: la pieza se manda fuera
+C 0x48CC Y
+C 0x48CF X
+C 0x48D2 numero de patron
+C 0x48D5 color
+C 0x48E1 el siguiente sprite lleva el patron siguiente
+C 0x48E8 y va ocho pixeles mas abajo
+C 0x48F4 0xD1: fuera de la pantalla por abajo
+L 0x48F9 escribe_atributo  Un byte a la tabla de atributos y adelante el puntero
+C 0x48FC WRTVRM
+L 0x4907 patron_base  Deja en 0xF881 el patron de partida de la figura
+C 0x4907 desplazamiento 4 respecto del patron de la postura
+C 0x4909 se guarda el desplazamiento pedido
+C 0x490E el campo 3 de la ficha es el estado
+C 0x4913 con estado distinto de cero no se toca el patron
+L 0x491B patron_mas_0  La figura sin desplazamiento
+L 0x491F patron_mas_10  Diez patrones mas alla
+L 0x4924 patron_mas_8  Ocho patrones mas alla
+L 0x4929 patron_mas_16  Dieciseis patrones mas alla
+L 0x492E patron_mas_15  Quince patrones mas alla
+L 0x4933 patron_mas_18  Dieciocho patrones mas alla
+L 0x4938 patron_mas_17  Diecisiete patrones mas alla
+L 0x493D patron_mas_12  Doce patrones mas alla
+L 0x4942 pon_sprite  Elige el patron de sprite que toca y lo sube a la VRAM
+C 0x4942 0x78 por debajo del patron base
+C 0x494A dieciseis bytes: media figura de 16x16
+C 0x494D el sprite de partida
+C 0x4953 estado 1: el muñeco esta parado
+C 0x4963 el campo 4 de la ficha es el fotograma del paso
+C 0x496C los fotogramas van de dieciseis en dieciseis bytes
+C 0x4972 --- salta tantos fotogramas como diga el campo 4 ---
+C 0x4985 y la otra media figura, 0x10 mas alla
+C 0x4993 parado: el sprite de 0xAA00
+L 0x4999 parpadea  Alterna el fotograma de parpadeo y voltea la figura
+C 0x499E el campo 5 de la ficha alterna entre 0 y 1
+C 0x49A8 la mitad de arriba de la figura
+C 0x49BA y se le da la vuelta a cada byte
+L 0x49C8 alterna_d6d8  0xD6D8 va y viene entre 0 y 1: el balanceo del muñeco
+C 0x49C8 el byte esta por encima de 0xD300, o sea que sobrevive a la recarga
+C 0x49D8 y con el, los sprites de 0xAA10 a 0xAA5F
+L 0x49DE voltea_bits  Invierte el orden de los bits de cada byte entre HL y DE
+C 0x49DE asi se consigue el dibujo mirando al otro lado sin gastar mas bytes
+C 0x49E0 el byte original
+C 0x49E1 bit 0 del original...
+C 0x49E3 ...pasa a ser el bit 7 del resultado
+C 0x4A09 y el byte volteado se escribe encima
+C 0x4A0B hasta llegar a DE
+L 0x4A10 bit0_a_bit7  Uno de los ocho pasos del volteo
+L 0x4A28 pon_sprite_de_brazo  El sprite del brazo, que cambia con lo que se lleva
+C 0x4A28 el campo 4 de la ficha
+C 0x4A2D sin fotograma, no hay brazo
+C 0x4A40 los brazos empiezan en 0xAA20
+C 0x4A46 --- salta tantos brazos como diga el campo 4 ---
+C 0x4A5F 0x88 por debajo del patron base
+C 0x4A6D estado 1 o 3: el brazo se lee de la propia pantalla
+C 0x4A7E se recogen los bytes de la VRAM uno a uno...
+C 0x4A9E ...con RDVRM...
+C 0x4AB0 ...y se sueltan como color de sprite
+B 0x4AC4 --- el relevo: se cambia de tripulante --------------------
+B 0x4AC4 El jugador no lleva un personaje sino a toda la tripulacion:
+B 0x4AC4 con el gatillo se pasa al siguiente, y el que se deja se
+B 0x4AC4 queda donde estaba con la postura que tuviera. Por eso la
+B 0x4AC4 posicion se guarda en la tabla de 0xB02C antes de soltarlo.
+L 0x4AC4 cambia_de_tripulante  Con el gatillo, se pasa a llevar a otro
+C 0x4AC4 el gatillo
+C 0x4ACA trepando no se suelta el mando
+C 0x4AD0 BEEP
+C 0x4AD3 0xF8AB, el contador de premios, a cero
+C 0x4AD7 el numero de tripulante que se deja
+C 0x4AE2 su casilla en la tabla de posiciones, cuatro bytes por entrada
+C 0x4AE9 se guardan las dos coordenadas de la ventana
+C 0x4AF4 y las dos de la ficha, la X...
+C 0x4AFD ...y la Y
+C 0x4B07 con el barco 2 hay que mirar la vela
+C 0x4B0F y con el 3, el estado de la tripulacion
+L 0x4B14 siguiente_barco  Pasa al barco siguiente, o al primer tripulante
+C 0x4B17 el barco 3 es el ultimo
+C 0x4B1C y si no, uno mas
+L 0x4B23 siguiente_tripulante_del_3  Dentro del barco 3, el tripulante siguiente
+C 0x4B23 0xF898 recorre la tripulacion
+C 0x4B2B 0xF39F es cuantos son
+C 0x4B32 al pasar del ultimo se vuelve al barco 0
+L 0x4B39 coloca_al_nuevo  Recupera la posicion guardada del que toca llevar
+C 0x4B39 barco mas tripulante da la entrada de la tabla
+C 0x4B44 cuatro bytes por entrada
+C 0x4B4B la columna de la ventana...
+C 0x4B50 ...y la fila
+C 0x4B55 los otros dos bytes son la posicion fina
+C 0x4B58 punteros al dia
+C 0x4B5B el campo 1 de la ficha: la X
+C 0x4B66 el campo 2: la Y
+C 0x4B73 y el campo 3, el estado, a 3
+C 0x4B76 con su pitido
+L 0x4B79 primera_pintada  Deja el barco y la tripulacion como estan al empezar
+C 0x4B79 0xF8A1 recorre la tripulacion; empieza fuera de rango
+C 0x4B7F 0xF8D1 y 0xF8D2: sin relevo pendiente ni premio
+C 0x4B85 lo que se ha estropeado
+C 0x4B88 la ruta anotada
+C 0x4B8B los avisos
+C 0x4B8E los otros tres barcos
+C 0x4B97 la lista de puestos de trabajo
+C 0x4B9D ocho tripulantes, uno por puesto de la lista
+C 0x4BB5 y se sube todo a la pantalla
+L 0x4BB8 pon_en_pantalla  Deja en 0xF89F/0xF8A0 la casilla del barco A
+C 0x4BB8 el barco pedido
+C 0x4BBB su ficha, once bytes por barco
+C 0x4BC2 con IX se leen los campos sin tocar HL
+C 0x4BCA el campo 3 es la X fina
+C 0x4BCD +4 y dividido entre 8: la columna
+C 0x4BD6 mas el campo 1, que es la columna gruesa
+C 0x4BDD y lo mismo con la fila
+L 0x4BF1 dibuja_y_baja  Pinta la baldosa A y baja una fila
+L 0x4BF4 baja_una_fila  0xF89F++ : una fila mas abajo en el mapa
+L 0x4BF9 dibuja_y_avanza  Pinta la baldosa A y avanza una columna
+L 0x4BFC avanza_columna  0xF8A0++
+L 0x4C01 dibuja_y_retrocede  Pinta la baldosa A y retrocede una columna
+L 0x4C04 retrocede_columna  0xF8A0--
+L 0x4C09 retrocede  0xF89F-- : una fila mas arriba
+L 0x4C0E pinta_barco_0  Dibuja el primer barco de la flota si no es el que se lleva
+C 0x4C0E el barco 0 no se dibuja si es el que se esta manejando
+C 0x4C15 su casilla
+C 0x4C18 y sus cinco baldosas: 0xE1 a 0xE5
+L 0x4C31 pinta_barco_1  Dibuja el segundo barco, con las baldosas 0xE8 a 0xEC
+C 0x4C31 el barco 1 no se dibuja si es el que se maneja
+C 0x4C37 su casilla
+C 0x4C3C baldosa 0xE8
+C 0x4C41 0xE9
+C 0x4C46 0xEA
+C 0x4C4B 0xEB
+C 0x4C50 y 0xEC
+L 0x4C55 pinta_barco_2  Dibuja el tercer barco, con la vela desplegada
+C 0x4C60 baldosas 0xD7, 0xD9 y 0xDD
+C 0x4C6F 0xF8A2 dice si lleva la vela puesta
+C 0x4C77 y remata con 0xEF y 0xEC
+L 0x4C81 pinta_la_vela  La vela del tercer barco, que ondea
+C 0x4C81 0xF8A2 alterna entre 1 y 2
+C 0x4C92 una fila abajo y una columna atras
+C 0x4CA0 la vela hinchada
+C 0x4CA2 baldosa 0xDE o 0xE0, segun toque
+C 0x4CA5 luego la 0x5C
+C 0x4CAA y la 0x6E
+C 0x4CAF tres columnas atras para dejar el cursor donde estaba
+C 0x4CB8 o la vela caida
+L 0x4CBD siguiente_tripulante  Adelanta el estado de un miembro de la tripulacion
+C 0x4CBD 0xF39F es cuantos son
+C 0x4CC1 0xF8A1 va recorriendolos
+C 0x4CCB al que lleva el jugador no se le toca
+C 0x4CDE 0xF8A3 es la tabla de estados, uno por tripulante
+C 0x4CE4 estado 0: en su puesto
+C 0x4CE7 estado 1
+C 0x4CEC estado 2
+C 0x4CF1 estado 3
+C 0x4CF6 estado 4: en un puesto de trabajo de la lista
+C 0x4CFB estado 5
+C 0x4D00 estado 7: se ha caido
+C 0x4D08 y por lo demas, el muñeco de pie
+L 0x4D21 casilla_del_tripulante  La casilla del tripulante 0xF8A1
+C 0x4D21 los tres primeros barcos van antes en la tabla de fichas
+L 0x4D29 tripulante_en_puesto  El tripulante de pie en su sitio
+C 0x4D29 su casilla
+C 0x4D34 una columna a la derecha
+C 0x4D37 baldosas 0xD4, 0xF1 y 0xE7: el cuerpo
+C 0x4D46 0xF8B1 es el balanceo: cambia la baldosa de los pies
+C 0x4D4E 0xDC con un balanceo...
+C 0x4D63 ...y 0xDF con el otro
+L 0x4D50 remata_de_pie  Las tres baldosas de abajo de la figura de pie
+C 0x4D53 una fila arriba
+C 0x4D56 baldosa 0xD5
+C 0x4D5B otra fila arriba
+C 0x4D5E y baldosa 0xD6
+L 0x4D68 tripulante_agachado  El tripulante trabajando agachado
+C 0x4D68 su casilla
+C 0x4D6B una columna a la derecha
+C 0x4D6E baldosa 0xD4
+C 0x4D73 0xF8B1 alterna la postura
+C 0x4D7B baldosa 0xF1
+C 0x4D80 0xDA y 0xDB: el cuerpo agachado
+C 0x4D9A la variante con la baldosa 0xE7
+C 0x4DA4 0xD8: el brazo estirado
+L 0x4D8D remata_agachado  Las dos baldosas de arriba, con aviso de relevo
+L 0x4DAF tripulante_tirando  El tripulante tirando de un cabo
+C 0x4DAF su casilla
+C 0x4DB2 baldosa 0xD4
+C 0x4DB7 0xF8B1 alterna la postura
+C 0x4DBF 0xF1 y 0x0A: los brazos en alto
+C 0x4DCC 0xE7 y 0xA4
+C 0x4DE3 la variante: 0x32, 0xA5 y 0xF5
+L 0x4DD3 remata_tirando  Las tres ultimas baldosas de la figura tirando
+C 0x4DD9 0xF5
+C 0x4DDE y 0xEC
+L 0x4DFA tripulante_lejos  El tripulante cinco columnas mas alla
+C 0x4DFA su casilla
+C 0x4DFD cinco columnas a la derecha
+C 0x4E0C baldosa 0xD4
+C 0x4E11 0xF8B1 alterna la postura
+C 0x4E19 0xF1 y 0xE6
+C 0x4E2B la variante: 0xF1, 0xE7 y 0xA2
+L 0x4E3A tripulante_en_la_vela  El tripulante trepado a la verga
+C 0x4E3A su casilla
+C 0x4E3D una fila abajo
+C 0x4E40 baldosas 0x2A, 0xF2, 0xF4 y 0xF7: los pies en la verga
+C 0x4E54 0xED y 0xEE
+C 0x4E5E y 0xF8, 0xF6, 0xF3 y 0xF0 hacia el otro lado
+L 0x4E72 tripulante_en_su_puesto  Lo coloca en el puesto de trabajo que toca
+C 0x4E72 0xF8AC recorre la lista de puestos de 0xC958
+C 0x4E75 columna del puesto
+C 0x4E7A fila del puesto
+C 0x4E7E y el puntero pasa al siguiente
+L 0x4EBE tripulante_caido  El tripulante tumbado: ha caido enfermo
+C 0x4EBE su casilla
+C 0x4EC1 baldosas 0xD4, 0xF1, 0xE7, 0xF5 y 0xEC
+C 0x4EDA una columna atras y una fila arriba
+C 0x4EDD 0xA0: la cabeza tumbada
+C 0x4EE2 0xF8B1 le cambia la postura
+C 0x4EE9 0xDF y dos veces 0x73
+C 0x4EFB o la 0xDC, la mas quieta
+C 0x4F00 0xF8D2 marca que hay alguien caido
+C 0x4F05 0xF8B3: solo con el efecto 1 se pide relevo
+L 0x4F0F remata_y_avisa  Pinta la ultima baldosa y avisa si hay que sustituirle
+C 0x4F12 0xF8D2: hay premio pendiente
+C 0x4F17 y con el efecto 2, se pide relevo
+L 0x4F22 remata_y_comprueba  Pinta y mira si el tripulante esta en un sitio clave
+C 0x4F31 0x0E09 y 0x1E31: dos casillas del barco que hay que vigilar
+C 0x4F42 0xF8B9 es el desastre en curso
+L 0x4F48 pide_relevo  0xF8D1 a 1: hace falta que alguien acuda
+B 0x4F60 --- la carga estibada en la bodega ----------------------
+B 0x4F60 Lo que se compro en el almacen de la primera parte no es solo
+B 0x4F60 un numero: se DIBUJA en la bodega, un monton por mercancia y
+B 0x4F60 tantas piezas como unidades queden. Dibujadas, las baldosas
+B 0x4F60 de cada monton son toneles de duelas, sacos atados, tablones
+B 0x4F60 apilados y rollos de tela.
+L 0x4F60 pinta_la_carga  Dibuja en la bodega lo que se lleva a bordo
+C 0x4F60 0x2B2A: la casilla desde la que se estiba
+C 0x4F66 los seis bytes que dejo la primera parte: lo comprado alli
+C 0x4F72 AGUA mas VINO: los toneles
+C 0x4F7C la COMIDA: los sacos
+C 0x4F86 la MADERA: los tablones
+C 0x4F90 y la TELA: los rollos
+L 0x4F94 pinta_toneles  La fila de toneles de bebida, tantos como diga 0xF8AC
+C 0x4F94 baldosas 0xBF a 0xC4: las duelas de un tonel
+C 0x4FB2 y otra fila mas mientras queden
+L 0x4FBA queda_uno_menos  0xF8AC-- y devuelve lo que queda
+L 0x4FC0 pinta_tablones  El monton de madera
+C 0x4FC0 tres columnas atras
+C 0x4FC9 baldosas 0xC6, 0xC7 (cuatro veces) y 0xC8
+C 0x4FE7 y dos columnas atras para la fila siguiente
+C 0x4FED mientras quede madera
+L 0x4FF5 pinta_rollos  Los rollos de tela
+C 0x4FF5 tres columnas atras
+C 0x4FFE baldosas 0xC5, 0xC9 (cuatro veces) y 0xCA
+C 0x501C y dos columnas atras
+C 0x5022 mientras quede tela
+L 0x502A pinta_sacos  Los sacos de comida
+C 0x502A baldosas 0xB9 a 0xBE: el saco con su cuerda
+C 0x5036 dos columnas atras
+C 0x5045 y otras dos hacia delante
+C 0x5048 mientras quede comida
+L 0x5050 pinta_baldosa  Escribe la baldosa A en la copia de la pantalla, si cabe y si se puede
+C 0x5050 la baldosa que hay que poner
+C 0x5053 la columna, en coordenadas del mapa...
+C 0x505A ...menos el scroll, da la columna de la pantalla
+C 0x505B fuera de las 32 columnas visibles, no se pinta
+C 0x5061 lo mismo con la fila
+C 0x5069 ni fuera de las 24 filas
+C 0x5075 0xB058 es la copia de la tabla de nombres
+C 0x507C y cada fila son 0x20 baldosas
+C 0x5089 lo que hay puesto ahora
+C 0x508A 0xFB, 0xFC, 0xF9 y 0xFA: las que dan puntos
+C 0x509E 0x34, 0x27, 0x1B, 0x33 y 0x31: borda, cubierta, escalera y mastil
+C 0x50AD 0xA3, 0x91, 0x5F, 0x0C, 0x6D, 0x4A y 0xB8: los mamparos
+C 0x50BF y hay baldosas que no se pisan: se dejan como estan
+C 0x50C2 lo demas se puede pisar y se pinta
+L 0x50C7 sube_pantalla  Sube de golpe la copia de 0xB058 a la tabla de nombres
+C 0x50CD 0x300 bytes: 32 por 24
+C 0x50D3 y ya se pueden abrir las interrupciones
+L 0x50D5 marca_bonus  Anota en 0xF8D2 que se ha pisado una baldosa de premio
+L 0x50DD mira_al_barco_2  El tercer barco tiene la vela puesta si esta en 0x1B0A
+C 0x50DD la casilla del barco 2
+C 0x50E2 0x1B0A: la casilla donde le da el viento
+C 0x50EC 1 con la vela puesta, 0 sin ella
+L 0x50F8 estado_del_tripulante  Decide en que estado queda cada tripulante
+C 0x50FC 0xF8C8 dice si hay una orden en marcha...
+C 0x5103 ...y para quien
+C 0x510A 0xF8CB, la segunda orden
+C 0x511E 0xF8D6 es el cansancio de cada tripulante
+C 0x5123 con 3 esta agotado
+C 0x513A 0xF8CB: la segunda orden
+C 0x5141 y a quien va dirigida
+C 0x514C --- el tripulante no tiene orden pendiente ---
+C 0x5154 0x0B0F, 0x2963, 0x0E09, 0x1E31 y 0x1E51: los puestos del barco
+C 0x517A fila 0x29, entre las columnas 9 y 0x1F: la cubierta
+C 0x518F pasa al estado 4: en su puesto de trabajo
+C 0x5197 por debajo de la fila 0x28 esta arriba
+C 0x51A2 --- el tripulante esta agotado (cansancio 3) ---
+C 0x51AA su casilla
+C 0x51AD fila 0x29, columnas 9 a 0x1F
+C 0x51BF y si no, estado 6
+L 0x51C2 estado_de  Apunta a la casilla de estado del tripulante 0xF898
+C 0x51C2 el tripulante en curso
+C 0x51C8 0xF8A3 es la tabla de estados, uno por tripulante
+L 0x51CD estado_5  El tripulante pasa al estado 5
+L 0x51D6 estado_3  El tripulante pasa al estado 3
+L 0x51DE estado_2  Con fuego declarado, el tripulante pasa al estado 2
+C 0x51DE 0xF39D es la TELA que queda
+C 0x51E2 sin tela no se puede sofocar el fuego: el tripulante vuelve a su puesto
+L 0x51ED estado_0  El tripulante vuelve a su puesto
+L 0x51F4 estado_1  Con via de agua, el tripulante pasa al estado 1
+C 0x51F4 0xF39C es la MADERA que queda
+C 0x51F8 sin madera no se tapa la via de agua: vuelve a su puesto
+L 0x5203 estado_7  El tripulante se cae
+L 0x520B estado_6  El tripulante pasa al estado 6
+L 0x5213 sonido_corto  Cinco registros del PSG: el pitido de aviso
+C 0x5213 registros 6, 7 y 8: ruido, mezcla y volumen
+C 0x5226 registros 12 y 13: el envolvente
+L 0x5233 pasa_el_tiempo  Un dia cada 60 vueltas del contador de 0xF8BD
+C 0x5233 0xF8BD cuenta las vueltas
+C 0x523A 0x3C = 60 vueltas
+C 0x5245 0xF8BC es la hora del dia, de 0 a 15
+C 0x5253 se cuenta un dia mas
+C 0x5256 se cansa a la tripulacion
+C 0x5259 se gastan las provisiones
+C 0x5262 0xF8BB es cuanto queda para que el barco se mueva
+C 0x526B 0xF8BF es el rumbo: 0 poniente, 1 levante, 2 norte, 3 sur
+L 0x527F casilla_del_oceano  Lee la casilla (0xF8B7, 0xF8B8) de la carta de 20x20
+C 0x527F 0xF8B7 es la columna
+C 0x5285 0xC98C es la carta
+C 0x5289 y cada fila son 0x14 = 20 casillas
+C 0x528C 0xF8B8 es la fila
+C 0x528F --- baja tantas filas como haga falta ---
+C 0x5298 y el valor de la casilla queda en 0xF8B9
+L 0x529C aplica_casilla  Segun lo que haya en la casilla, decide que pasa
+C 0x529D 0xF8B3 es el efecto en curso
+C 0x52A3 el valor de la casilla
+C 0x52A7 0: mar abierto
+C 0x52AA 1: corriente a favor
+C 0x52AF 2: corriente en contra
+C 0x52B4 y de 3 en adelante, un contratiempo
+C 0x52BF los efectos se indexan por el valor menos 3
+C 0x52C4 la tabla de efectos, de cuatro bytes por entrada
+C 0x52CB se copian a 0xF8B3-0xF8B6
+C 0x52DA la ruta se empieza a anotar en 0xCB1E
+C 0x52E0 y el punto de partida, en 0xCB1C
+L 0x52E7 tres_de_avance  Con mar abierto, el barco avanza tres
+L 0x52ED uno_de_avance  Con corriente a favor, avanza uno
+L 0x52F3 dos_de_avance  Con corriente en contra, avanza dos
+L 0x52F9 rumbo_poniente  Una casilla hacia poniente
+C 0x52F9 en la columna 0 ya no se puede ir mas
+L 0x5307 rumbo_levante  Una casilla hacia levante
+C 0x530A 0x13 es la ultima columna de la carta
+L 0x5313 rumbo_norte  Una casilla hacia el norte
+L 0x5321 rumbo_sur  Una casilla hacia el sur
+C 0x5324 0x13 es la ultima fila
+L 0x532D copia_byte  Un byte de (HL) a (DE) y adelante los dos
+L 0x5332 fin_del_mundo  Al llegar al borde de poniente, se acabo la travesia
+C 0x5332 0xFF en 0xF8DE: el desenlace
+L 0x533D avanza_la_ruta  Va marcando en la carta el rastro del barco
+C 0x533D con el reloj a media vuelta no se anota nada
+C 0x5345 0xF8B3 es el efecto: sin efecto, se reinicia la ruta
+C 0x534C efecto 1
+C 0x5354 efecto 2
+C 0x5359 efecto 3
+L 0x535F anota_los_puntos  Recorre la ruta anotada y va marcando por donde pasa
+C 0x535F con la interrupcion cerrada
+C 0x5366 0x28: veinte puntos de ruta
+C 0x536D 0xCB1C es la lista de puntos
+C 0x5374 --- un punto por vuelta ---
+C 0x5375 una columna a la derecha
+C 0x5391 si no, una fila abajo
+C 0x53A5 o una fila arriba
+C 0x53B9 o una columna a la izquierda
+C 0x53CD hasta agotar la lista
+L 0x53E0 pasos_efecto_1  El efecto 1 se nota a las horas 7, 8 y 9
+C 0x53E0 0xF8BC es la hora del dia
+C 0x53E3 hora 7
+C 0x53E8 hora 8
+C 0x53ED hora 9
+L 0x53F3 pasos_efecto_2  El efecto 2 se nota a las horas 4, 5 y 6
+C 0x53F3 0xF8BC es la hora del dia
+C 0x53F6 hora 4
+C 0x53FB hora 5
+C 0x5400 hora 6
+L 0x5406 pasos_efecto_3  El efecto 3 se nota a las horas 5, 8 y 11
+C 0x5406 0xF8BC es la hora del dia
+C 0x5409 hora 5
+C 0x540E hora 8
+C 0x5413 hora 11
+L 0x5419 punto_de_ruta  Anota un punto nuevo de la ruta si la baldosa lo permite
+C 0x541C 0xFF marca el final de la lista
+C 0x541F 0x34 es la borda: por ahi no se pasa
+C 0x5425 la lista de puntos ya anotados
+C 0x542B --- mira si el punto ya estaba ---
+C 0x5442 el mapa del barco
+C 0x544C y cada fila son 0x80 baldosas
+C 0x545F el efecto en curso decide que baldosas valen
+C 0x5464 efectos 1 y 2
+C 0x546C efecto 3
+L 0x5472 anota  Mete el punto en la lista y adelanta el puntero
+C 0x5472 el final de la lista
+C 0x5475 la columna...
+C 0x547A ...y la fila
+C 0x547F dos bytes por punto
+L 0x5483 baldosas_de_paso  Las diecinueve baldosas por las que puede ir la ruta
+C 0x5483 la baldosa que se leyo del mapa
+C 0x5486 0x0A, 0x0D, 0x09, 0x0F...
+C 0x549A ...0x07, 0x08, 0x10, 0x11 y 0x0E: suelo
+C 0x54B3 0x31, 0xA4, 0xA3, 0x91...
+C 0x54C7 ...0x5F, 0x0C, 0x6D, 0x4A y 0xB8: mamparo
+C 0x54E0 lo demas corta la ruta
+L 0x54E1 baldosa_de_escala  Con el efecto 3 solo vale la 0x5C: la escala
+L 0x54EA reinicia_la_ruta  Deja el puntero de ruta en el principio de la lista
+L 0x54F1 borra_la_ruta  Deshace el rastro cuando hay que volver atras
+C 0x54F1 sin efecto no hay ruta que borrar
+C 0x54F9 con el puntero al principio tampoco
+C 0x54FE se recorre la lista desde el principio
+C 0x5505 con el efecto 2 se borra de otra forma
+C 0x550D --- un punto por vuelta ---
+C 0x551B efecto 1: la baldosa 0xF9
+C 0x5523 efecto 2: la baldosa 0xFB
+C 0x5528 efecto 3: la baldosa 0x8F
+C 0x552D 0xF8B1 alterna la baldosa: el rastro parpadea
+L 0x5540 rastro_efecto_1  Baldosa base 0xF9
+L 0x5545 rastro_efecto_2  Baldosa base 0xFB
+L 0x554A rastro_efecto_3  Baldosa 0x8F, sin parpadeo
+L 0x554F rastro_del_fuego  El rastro del efecto 2 se pinta con tres baldosas
+C 0x5555 el punto de partida
+C 0x5564 0xF8B1 alterna el dibujo
+C 0x556B baldosas 0xFF, 0xFD y 0xFE
+L 0x5598 dos_atras  Dos columnas hacia atras
+L 0x559E pinta_los_avisos  Los dos avisos de la carta
+C 0x559E 0xF8C8: primera orden pendiente
+C 0x55A5 su casilla esta en 0xF8C9
+C 0x55AB 0xF8CB: segunda orden pendiente
+C 0x55B0 su casilla, en 0xF8CC
+L 0x55B3 pinta_aviso  Las dos baldosas del aviso: 0x9F y 0xA0
+L 0x55C0 luz_de_aviso  Enciende o apaga el LED de CAPS como alarma
+C 0x55C0 solo con el barco 3, el que lleva el jugador
+C 0x55CA 0xF8C8: hay orden pendiente...
+C 0x55D1 ...y es para este tripulante
+C 0x55D8 lo mismo con la segunda orden
+C 0x55E6 CHGCAP con 0xFF apaga la luz...
+C 0x55EB ...y con 0, la enciende
+L 0x55EF tecla_de_orden  Mira la fila 3 del teclado: la tecla que da la orden
+C 0x55F2 solo con el barco 3
+C 0x55F6 SNSMAT lee la fila 3 de la matriz
+C 0x55FB 0xFE: la tecla que corresponde al bit 0
+C 0x55FE el estado del tripulante
+C 0x5602 al que ya esta caido no se le manda nada
+C 0x5605 su casilla en el mapa
+C 0x5613 la casilla de la primera orden
+C 0x561D se apunta la orden...
+C 0x5622 ...y para quien es
+C 0x5628 --- la segunda orden ---
+C 0x562D su casilla, en 0xF8CC
+C 0x5630 se mira si el tripulante esta cerca
+C 0x5635 y se apunta a quien le toca
+L 0x569F comprueba_segunda  Mira si la orden que se anula es la segunda
+C 0x569F 0xF8CB: hay segunda orden
+C 0x56A4 y es para este tripulante
+L 0x5641 esta_cerca  Compara la posicion con cuatro casillas alrededor
+C 0x5641 la casilla de la orden
+C 0x5645 una fila mas abajo
+C 0x5654 no esta cerca
+C 0x5655 se deshacen las tres filas sumadas
+L 0x5659 acepta_la_orden  El tripulante acude: suena y se le pone en camino
+C 0x5659 BEEP
+C 0x565C y el pitido del PSG
+C 0x5665 0xF8D6 es el cansancio
+C 0x566A al agotado no se le manda
+C 0x566F y si no, estado 7: en camino
+L 0x5679 anula_orden  La tecla que cancela la orden dada
+C 0x567C solo con el barco 3
+C 0x567F trepando no se dan ordenes
+C 0x5685 SNSMAT lee la fila 3
+C 0x568A 0xFD: la tecla del bit 1
+C 0x56A9 se borra la orden que estuviera puesta
+C 0x56B4 la casilla del muñeco...
+C 0x56BB ...que pasa a ser la de la orden
+C 0x56BF dos filas mas abajo: donde se le deja
+C 0x56C2 se guarda la columna...
+C 0x56C4 ...y la fila
+C 0x56CB y el tripulante vuelve al estado 0
+L 0x56D2 casilla_del_muneco  Convierte la posicion en pixeles a casilla del mapa
+C 0x56D5 el campo 1 de la ficha: la X fina
+C 0x56DA +4 y dividido entre 8
+C 0x56E3 mas el scroll horizontal
+C 0x56EA el campo 2: la Y fina
+C 0x56F8 mas el scroll vertical
+L 0x5700 cambia_el_cielo  Cambia el color del borde y la fuente segun la hora del dia
+C 0x5700 trepando no se toca nada
+C 0x5705 0xF8BC es la hora, de 0 a 15
+C 0x5708 antes de las 3: de noche
+C 0x570D antes de las 5: amanecer
+C 0x5712 antes de las 11: de dia
+C 0x5717 antes de las 13: atardecer
+C 0x571C --- de noche ---
+C 0x571F si aun no esta puesta, se cambia la fuente
+C 0x5723 tinta 1 sobre el cielo
+C 0x5728 0xF8CF es el color del cielo, que va bajando
+C 0x572B 0x0F, 0x0E, 0x0B, 0x07, 0x09 y 0x08: el degradado
+C 0x5767 --- amanecer y atardecer ---
+C 0x576E color 4
+C 0x577A el registro 7 lleva tinta y borde en un solo byte
+C 0x5786 los colores de la parte de arriba de la pantalla
+C 0x5797 0x2530: una franja de 0x20 bytes de color
+C 0x57A5 y una baldosa mas
+L 0x57B1 escribe_registro_7  WRTVDP del registro 7: tinta y color del borde
+L 0x57B7 pinta_franja_de_cielo  Ocho bytes de color a partir de HL
+L 0x57C0 cielo_de_dia  El cielo claro del mediodia
+C 0x57C4 si estaba la fuente de noche, se repone la de dia
+C 0x57CD color 7
+L 0x57D2 repon_la_fuente  Vuelve a la fuente de dia
+L 0x57D9 fuente_de_noche  Cambia dos trozos de la tabla de colores: se hace de noche
+C 0x57D9 0xF8D0 marca que la fuente de noche esta puesta
+C 0x57DE 0x2328: la primera franja de color
+C 0x57E4 0x10 bytes
+C 0x57EA los colores de noche, en 0xCB96
+C 0x57F3 0x2378: la segunda franja
+C 0x57FF con 0x20 bytes mas, en 0xCBA6
+L 0x5808 quita_punto_de_ruta  Retira el ultimo punto anotado
+C 0x580B trepando no se toca
+C 0x580D 0xF8D1: hace falta relevo
+C 0x5815 con la ruta vacia no hay nada que quitar
+C 0x581D dos bytes atras: un punto
+C 0x5827 y sin ruta, sin efecto
+L 0x582C fin_de_la_travesia  Comprueba si el barco ha llegado y salta al final
+C 0x582C 0xF8A2: hace falta la vela puesta
+C 0x5831 y ser el barco 0
+C 0x5836 la casilla del muñeco
+C 0x583C 0x1C0D y 0x1B0D: las dos casillas del timon
+C 0x5848 hay que pulsar el gatillo
+C 0x584E BEEP
+C 0x5852 el registro 7, con el borde a 1
+C 0x5857 SCREEN 2
+C 0x585C la fuente de la carta
+C 0x585F y la tabla de nombres de la carta
+C 0x586B --- el bucle de la carta oceanica ---
+C 0x587D se sale con el gatillo
+C 0x5885 el POP tira la vuelta pendiente del bucle principal
+L 0x5889 carga_fuente_de_carta  La otra fuente: patrones en 0xB958 y colores en 0xC158
+C 0x5889 0x800 bytes: 256 baldosas
+C 0x5895 los patrones, en 0xB958
+C 0x589E y a la tabla de colores
+C 0x58A4 los colores, en 0xC158
+L 0x58AD escribe_dias  Los dos digitos del contador de dias
+C 0x58AD 0x1862: la casilla de las decenas
+C 0x58B3 0x2D: la baldosa del digito 0
+C 0x58B9 y las unidades al lado
+L 0x58C1 barra_moral  Pinta la barra del estado moral
+C 0x58C1 0x1921: donde empieza la barra
+C 0x58C7 0xF8D5 es lo que se ha perdido...
+C 0x58CB ...de cuatro tramos
+C 0x58D1 --- un tramo por vuelta ---
+C 0x58D9 0x37: la baldosa del tramo lleno
+L 0x58EC barra_fisica  Pinta la barra del estado fisico
+C 0x58EC 0xF8B9 es el contratiempo en curso
+C 0x58F0 sin contratiempo, un solo tramo
+C 0x58F3 con el 2, dos
+C 0x58F8 y con los demas, cuatro
+C 0x58FD 0x1AFC: donde empieza esta barra
+L 0x5910 barras_tripulacion  Una barra por miembro de la tripulacion
+C 0x5911 0xF882 recorre la tripulacion
+C 0x5918 0xF39F es cuantos son
+C 0x5920 0x19E2: la primera barra
+C 0x5923 y cada una, una fila mas abajo
+C 0x5938 0xF8D6 es el cansancio del tripulante
+C 0x593E tres tramos menos el cansancio
+L 0x594E marca_en_la_carta  Pinta la posicion del barco en la carta oceanica
+C 0x5954 0x1849: la esquina de la carta en la pantalla
+C 0x595B y cada fila son 0x20 baldosas
+C 0x5967 0xF8BF es el rumbo
+C 0x5978 baldosa 0x12: rumbo sur
+C 0x597D baldosa 0x0F: rumbo poniente
+C 0x5982 baldosa 0x11: rumbo levante
+C 0x5987 baldosa 0x10: rumbo norte
+L 0x598C mira_el_viento  Cuenta los tripulantes en su puesto y da el rumbo
+C 0x598C 0xF39F es cuantos son
+C 0x5992 la tabla de estados
+C 0x5995 --- busca uno con el estado 5 ---
+C 0x59A8 el mando dice hacia donde
+C 0x59AB 1: rumbo poniente
+C 0x59B0 3: levante
+C 0x59B5 5: norte
+C 0x59BA 7: sur
+L 0x59C2 pon_rumbo  Deja el rumbo en 0xF8BF
+L 0x59D4 cuenta_dia  Suma un dia al contador de dos digitos
+C 0x59D4 0xF8D4 son las unidades
+C 0x59DB a las diez, se lleva una
+C 0x59E2 0xF8D3 son las decenas
+C 0x59E9 y a las diez, vuelta a empezar
+L 0x59F1 desanima  Con el contratiempo en marcha, la moral baja un punto
+C 0x59F1 0xF8DF marca que hay contratiempo activo
+C 0x59F6 0xF8D5 es lo perdido de moral
+C 0x59F9 al cuarto, motin
+C 0x5A03 0xF8DE a 1: el desenlace por desmoralizacion
+L 0x5A0C desgasta_tripulacion  Va cansando a los que llevan mucho tiempo trabajando
+C 0x5A0C 0xF39F es cuantos son
+C 0x5A12 la tabla de estados...
+C 0x5A15 ...y la de cansancio
+C 0x5A18 --- uno por vuelta ---
+C 0x5A1E estado 4: en un puesto de trabajo; ese descansa
+C 0x5A24 con el cansancio ya a 3, no se sube mas
+C 0x5A2A un punto de cansancio
+C 0x5A37 y al llegar a 3 se le manda al estado 6
+C 0x5A3A --- pasa al tripulante siguiente ---
+C 0x5A41 las dos tablas avanzan a la vez
+C 0x5A46 el que descansa va recuperando
+L 0x5A51 gasta_provisiones  Descuenta bebida y comida cada 30 unidades de tiempo
+C 0x5A51 0xF39F, la tripulacion: cuantos mas van a bordo, mas se gasta
+C 0x5A55 0xF8E0 acumula el gasto de bebida
+C 0x5A5C y 0xF8E1 el de comida
+C 0x5A66 cada 30 unidades se descuenta una racion
+C 0x5A70 0xF39A: primero se bebe el AGUA...
+C 0x5A7E ...y cuando se acaba, el VINO
+C 0x5A89 --- la COMIDA, con su propio contador ---
+C 0x5A8C tambien cada 30 unidades
+C 0x5A94 0xF39E: lo que queda de comida
+C 0x5A9B una racion menos
+C 0x5AA0 sin nada que comer ni beber, el desenlace 2: AGOTADAS PROVISIONES
+L 0x5AA9 penaliza  Aplica el castigo de la casilla en la que se ha caido
+C 0x5AA9 0xF8B9 es el contratiempo
+C 0x5AAC los valores 0, 1 y 2 no castigan
+C 0x5AB4 0xF8B3 dice si se esta atendiendo
+C 0x5ABB contratiempos 6, 7 y 8: se gasta MADERA
+C 0x5AC3 del 9 en adelante: se gasta TELA
+C 0x5AD0 con el contratiempo atendido...
+C 0x5AD3 ...cada efecto tiene su desenlace
+L 0x5AF0 pantalla_de_desastre  El motin, el fuego, la via de agua... con su mensaje
+C 0x5AF0 0xF8DE es el desenlace; a cero no hay ninguno
+C 0x5AF5 el registro 7, con el borde a 7
+C 0x5AFA SCREEN 2
+C 0x5AFF la fuente de la carta
+C 0x5B02 y la tabla de nombres del final
+C 0x5B0E el mensaje que toca
+C 0x5B11 los cinco mensajes empiezan en 0xCBDC
+C 0x5B14 y miden 0x16 = 22 caracteres
+C 0x5B17 --- salta hasta el mensaje pedido ---
+C 0x5B27 0x4E8: la baldosa donde se escribe
+C 0x5B2D --- una letra por vuelta ---
+C 0x5B34 0x1BBF es CGTABL, la fuente de la ROM
+C 0x5B37 ocho bytes por caracter
+C 0x5B49 el patron de la letra, a la tabla de patrones
+C 0x5B60 BEEP: una letra, un pitido
+C 0x5B6A las 22 letras del mensaje
+L 0x5B72 marca_ruta_en_carta  Pinta un punto del rastro en la carta
+C 0x5B78 0xB3A1: la esquina de la carta en su tabla de nombres
+C 0x5B7C y cada fila son 0x20 baldosas
+C 0x5B8B 0x1C: la baldosa del rastro
+L 0x5B8F rotulo_de_final  Las tres lineas de abajo de la pantalla de final
+C 0x5B8F 0x14 = 20 baldosas por linea
+C 0x5B92 0x1A86: la primera linea
+C 0x5B9E la segunda, una fila mas abajo
+C 0x5BAA y la tercera
+C 0x5BB3 BEEP
+C 0x5BB6 --- espera al gatillo ---
+C 0x5BBE el POP tira la vuelta pendiente y se vuelve a empezar
+L 0x5BC2 llegada  La pantalla de FINAL DE LA TRAVESIA
+C 0x5BC2 0xFF en 0xF8DE es el desenlace bueno
+C 0x5BC8 el registro 7, con el borde a 1
+C 0x5BCD SCREEN 2
+C 0x5BD5 la tabla de nombres de la carta
+C 0x5BE1 0xCC9C: veinte filas de tres baldosas
+C 0x5BE7 0x1846: donde se pintan
+C 0x5BED --- tres baldosas por vuelta ---
+C 0x5BFA BEEP
+C 0x5C06 la fila siguiente, 0x20 mas alla
+C 0x5C13 hasta 0xCCD8, el final de la lista
+L 0x5C1D lee_mando  Deja en 0xF891 la direccion del mando o del cursor
+C 0x5C1D primero el cursor del teclado...
+C 0x5C25 ...y si no hay nada, el mando del puerto 1
+L 0x5C2E lee_gatillo  Deja en 0xF892 el gatillo o la barra
+C 0x5C2E primero la barra espaciadora...
+C 0x5C36 ...y si no, el boton del mando
+
+D 0x5C3F 0x5C7A restos_de_montaje  0x3B bytes que no ejecuta nadie. Los tres primeros son un `jp 0x401F` suelto y los 0x38 siguientes son copia EXACTA de 0x5BC2-0x5BF9 (comprobado byte a byte), el principio de la rutina de llegada. La copia se corta a mitad. El mismo artefacto sale al final del cargador y al final de la primera parte.
+F 0x5C3F 8
+
+D 0x5C7A 0x6400 relleno_de_bloque  Los 1926 bytes que sobran del trozo de 0x2400, y que ninguna instruccion del programa lee. No son basura al azar: llevan un patron de ocho, cuatro bytes de {0x1F, 0x8F, 0x9F, 0xBF, 0xDF, 0xFF} y cuatro de {0x00, 0x20, 0x40, 0x60}, o sea que el nibble bajo es siempre 0 o F y solo cambia el alto (medido: 964 bytes acaban en F y 962 en 0). Esa forma es la de una tabla de COLORES de SCREEN 2 -tinta variable sobre fondo blanco o transparente-, y la cola de 0xCCD8 del trozo alto lleva el mismo patron. Pero la medida NO lo confirma: aqui el nibble bajo es 0 o F en el 100 % de los bytes, y en las tablas de color de este mismo juego eso solo pasa entre el 0 % y el 36,5 % de las veces (colores_comunes 12,5, pantalla_1_colores 0,0, pantalla_4_colores 4,4, fuente_barco_colores 6,3, pantalla_3_colores 36,5). La unica tabla de la cinta con esta forma es la de la pantalla de carga, que es tinta sobre blanco y da el 98,4 %. Dibujados como patrones no sale ningun dibujo, solo barras. Tampoco es la memoria que dejo la primera parte: en estas mismas direcciones solo coincide el 27,5 % de los bytes, y el fondo de coincidencia entre los dos programas es del 2,3 %. Y hay una medida que descarta la tabla de colores del todo: los grupos de ocho NO estan alineados a 8. Barriendo las ocho fases con la regla "las cuatro primeras acaban en F y las cuatro ultimas en 0", se cumple en el 100 % de los bytes empezando en 0x5C7A y solo en el 50 % empezando en la direccion 8-alineada 0x5C80; o sea que los registros caen en direcciones con resto 2 al dividir por 8. Una tabla de colores de SCREEN 2 esta alineada a 8 por construccion (base + baldosa*8), asi que esto no lo es. Las otras dos colas de la cinta llevan la MISMA fase -0xCCDA en el trozo alto y 0x5FFA en la primera parte, las dos al 100 %-, lo que dice que las tres salen del mismo sitio y no es casualidad. Tampoco estaba en pantalla: contra los dos volcados de VRAM de openMSX (16 KB cada uno) no hay una sola coincidencia de 32 bytes. Ni tiene eco en el resto de la cinta: buscando ventanas de 24 bytes en los cinco listados, esta cola no aparece fuera de si misma. Que es exactamente queda como pregunta abierta; la pista viva es ese desfase de dos bytes, que sugiere registros de ocho con dos bytes de cabecera delante.
+F 0x5C7A 8

@@ -1,0 +1,142 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Findings — El Descubrimiento de America (Gema/OMK, 1987)</title>
+<style>
+:root{--tinta:#cfd0d4;--suave:#83868f;--fondo:#000;--panel:#0c0e13;--linea:#23262e;
+  --rojo:#ff897d;--cyan:#65dbef;--verde:#3eb849;--oro:#ded087}
+@media (prefers-color-scheme:light){:root{--tinta:#191a1e;--suave:#5a5d66;--fondo:#e9e7e1;
+  --panel:#f7f6f2;--linea:#d0cdc5;--rojo:#b23f34;--cyan:#1c6b7c;--verde:#2b7734;--oro:#8a7420}}
+:root[data-theme="dark"]{--tinta:#cfd0d4;--suave:#83868f;--fondo:#000;--panel:#0c0e13;
+  --linea:#23262e;--rojo:#ff897d;--cyan:#65dbef;--verde:#3eb849;--oro:#ded087}
+:root[data-theme="light"]{--tinta:#191a1e;--suave:#5a5d66;--fondo:#e9e7e1;--panel:#f7f6f2;
+  --linea:#d0cdc5;--rojo:#b23f34;--cyan:#1c6b7c;--verde:#2b7734;--oro:#8a7420}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fondo);color:var(--tinta);padding:0 1.25rem 6rem;
+  font:15px/1.7 ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+.w{max-width:1120px;margin:0 auto}
+.n{max-width:68ch}
+h1,h2,h3,h4{font-weight:400;text-wrap:balance}
+a{color:var(--cyan)}
+img{image-rendering:pixelated;max-width:100%;height:auto;display:block}
+header.top{display:flex;flex-direction:column;align-items:center;gap:1.5rem;
+  padding:4rem 0 2rem;text-align:center}
+header.top img{width:min(100%,642px)}
+.claim{max-width:60ch;color:var(--suave);font-size:1.05rem}
+.claim b{color:var(--tinta);font-weight:400}
+.ficha{display:flex;flex-wrap:wrap;justify-content:center;gap:0 1.5rem;width:100%;
+  font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--suave);
+  border-top:1px solid var(--linea);border-bottom:1px solid var(--linea);padding:.85rem 0}
+.ficha b{color:var(--rojo);font-weight:400}
+nav{display:flex;flex-wrap:wrap;gap:1.25rem;justify-content:center;padding:1.25rem 0;
+  font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+nav a{color:var(--suave);text-decoration:none;border-bottom:1px solid transparent}
+nav a:hover,nav a:focus{color:var(--tinta);border-bottom-color:var(--rojo)}
+nav.docs{border-top:1px solid var(--linea);border-bottom:1px solid var(--linea);
+  margin-bottom:1rem}
+section{margin-top:4.5rem;scroll-margin-top:1rem}
+section>h2{font-size:1rem;letter-spacing:.1em;text-transform:uppercase;
+  border-left:3px solid var(--rojo);padding-left:.9rem;margin:0 0 1.5rem}
+.cifras{display:grid;gap:1px;background:var(--linea);border:1px solid var(--linea);
+  grid-template-columns:repeat(auto-fit,minmax(160px,1fr))}
+.cifra{background:var(--panel);padding:1.1rem}
+.cifra b{display:block;font-size:1.7rem;color:var(--oro);font-weight:400;
+  font-variant-numeric:tabular-nums;line-height:1.2}
+.cifra span{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--suave)}
+.hall{border-top:1px solid var(--linea);padding-top:1.75rem;margin-top:2.5rem}
+.hall:first-of-type{border-top:0;padding-top:0;margin-top:0}
+.hall h3{margin:0 0 .75rem;font-size:1.15rem;color:var(--rojo)}
+.hall h4{color:var(--oro);margin:1.5rem 0 .5rem;font-size:.95rem}
+.hall p{margin:0 0 1rem}
+pre.asm{background:var(--panel);border-left:2px solid var(--verde);margin:1.25rem 0;
+  padding:1rem 1.1rem;overflow-x:auto;font-size:13px;line-height:1.6;color:var(--tinta)}
+.par{display:grid;gap:1.25rem;grid-template-columns:1fr}
+@media(min-width:820px){.par{grid-template-columns:1fr 1fr}}
+.par figure{margin:0}
+table{border-collapse:collapse;width:100%;margin:1.25rem 0;font-size:13px;display:block;
+  overflow-x:auto}
+th,td{text-align:left;padding:.5rem .75rem;border-bottom:1px solid var(--linea)}
+th{color:var(--suave);font-weight:400;font-size:11px;letter-spacing:.07em;text-transform:uppercase}
+td.num{font-variant-numeric:tabular-nums;color:var(--oro)}
+.nivel{margin-top:2rem}
+.nivel h3{margin:0 0 .9rem;font-size:.95rem;letter-spacing:.06em;text-transform:uppercase}
+.nivel em{color:var(--cyan);font-style:normal}
+.sep{color:var(--suave);margin:0 .6rem}
+.rejilla{display:grid;gap:.9rem;grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
+.rejilla figure{margin:0;background:var(--panel);box-shadow:0 0 0 1px var(--linea)}
+.rejilla figcaption{display:flex;justify-content:space-between;padding:.45rem .65rem;
+  font-size:11px;color:var(--suave);border-top:1px solid var(--linea)}
+.dir{font-variant-numeric:tabular-nums;color:var(--verde)}
+footer{margin-top:5rem;padding-top:1.5rem;border-top:1px solid var(--linea);
+  color:var(--suave);font-size:12px}
+
+/* Aviso de trabajo en curso: tiene que verse antes que las cifras, porque un
+   100% mal leido hace mas dano que no ponerlo. */
+.aviso{background:#3a2a10;border-left:3px solid var(--oro);margin:1.5rem auto;
+  padding:1rem 1.2rem;max-width:900px;border-radius:4px}
+.aviso p{margin:0;color:var(--tinta);font-size:15px;line-height:1.65}
+.galeria{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:1.5rem;margin:1.5rem 0}
+.galeria figure{margin:0}
+.galeria img{width:100%;height:auto;image-rendering:pixelated;
+  border:1px solid var(--linea);border-radius:3px}
+.galeria figcaption{color:var(--suave);font-size:13px;margin-top:.5rem}
+audio{display:block;width:100%;max-width:640px;margin:.75rem 0 1.5rem}
+</style>
+<div class="w"><nav class="top"><a href="index.html">Home</a><a href="GETTING-STARTED.html">Start</a><a href="THE-GAME.html">The game</a><a href="THE-CARTRIDGE.html">The tape</a><a href="THE-CODE.html">The code</a><a href="FINDINGS.html" style=color:var(--tinta)>Findings</a><a href="IN-THE-EMULATOR.html">In the emulator</a><a href="OPEN-QUESTIONS.html">Open questions</a><a href="es/HALLAZGOS.html" style="margin-left:auto;color:var(--oro)">Castellano</a></nav>
+<h1 id="findings">Findings</h1>
+<p>What turned up when the tape was taken apart. Everything here is <b>measured</b> -by running the format, by reading the constants the code itself counts with, or by cross-checking against the machine- not deduced from how the bytes look. What is not settled is not here: it is in <a href="OPEN-QUESTIONS.html">Open questions</a>.</p>
+<h2 id="0xd300-is-not-code-it-is-a-pointer">0xD300 is not code: it is a pointer</h2>
+<p>The <code>CARGA</code> binary runs from 0xC000 to 0xD3DF, but its execution address is <b>0xD302</b>, not 0xD300. The reason is in those two bytes: they hold <code>69 D3</code>, the word <b>0xD369</b>, which is the loop that reads a tape block.</p>
+<p>The first half of the game ends like this:</p>
+<pre><code>5CC2  ld hl,(0xD300)
+5CC5  push hl
+5CC6  ret</code></pre>
+<p>That is how it returns to the loader to ask for the second half <b>without carrying the address in its own code</b>. The loader at 0xD300-0xD3DF survives both programs because no tape block reaches past 0xD2FF.</p>
+<h2 id="the-bios-never-reads-the-two-big-blocks">The BIOS never reads the two big blocks</h2>
+<p>Files 04 and 05 on the tape have no header. The loop at 0xD369 reads them by hand with TAPION and TAPIN, byte by byte, and splits each into three sync bytes (<code>03 02 01</code>), 0x2400 bytes at 0x4000 and 0x5300 bytes at 0x8000.</p>
+<pre><code>3 + 9216 + 21248 = 30467</code></pre>
+<p>which is exactly what block 05 measures. Block 04 is five bytes longer, and they are <code>.cas</code> alignment padding: zeros, checked.</p>
+<p>Hence the <b>two halves of the game occupying exactly the same addresses</b>, and hence this disassembly being five listings and not one.</p>
+<h2 id="inside-the-caravel-128-x-52-tiles">Inside the caravel: 128 x 52 tiles</h2>
+<p>The second half does not play out in screens: it plays out inside a longitudinal cutaway of the ship, <b>1024 x 416 pixels</b>, with the deck, three masts with their sails and rigging ladders, and three runs of cabins and hold below.</p>
+<p><img src="imagenes/p2_mapa.png" alt="The inside of the caravel"></p>
+<p>The 0x1A00 bytes run from 0x9000 to 0xA9FF. What says the width is 128 is <b>no declared constant at all</b>: it is the 0x80 step between rows in the loop at 0x4285. The check that it is read right is that the 32x24 window the game cuts matches the emulator across <b>all 768 tiles, zero differences</b>.</p>
+<h2 id="what-you-buy-is-drawn-stowed-in-the-hold">What you buy is drawn stowed in the hold</h2>
+<p>The five commodities are bought at the quayside warehouse, each costing one of the sixteen units of MONEY. But the number does not stay in a counter: the routine at <b>0x4F60</b> in the second half stows the cargo in the hold, <b>one pile per commodity and as many pieces as units remain</b>.</p>
+<p><img src="imagenes/p2_carga.png" alt="The cargo tiles"></p>
+<p>Drawn out, the tiles of each pile are staved barrels for water and wine (0xBF-0xC4), tied sacks for food (0xB9-0xBE), stacked planks (0xC6-0xC8) and rolls of cloth (0xC5, 0xC9 and 0xCA).</p>
+<h2 id="which-counter-is-which-has-to-be-measured-and-the-handover-crosses-them">Which counter is which has to be measured, and the handover crosses them</h2>
+<p>At the end of the first half there is a summary with seven figures. The labels are <b>artwork, not text</b>, so which is which cannot be assumed — and this disassembly&#x27;s first attempt had it wrong.</p>
+<p>How to measure it: the loop at 0x5D0C paints the fourteen digits on <b>consecutive</b> tiles from 188 on, so it is enough to look those tiles up in the name table at 0xC310 to see which label each one falls under.</p>
+<p><img src="imagenes/p1_fin_marcado.png" alt="The summary with each counter marked"></p>
+<table><tr><th>counter</th><th>label</th><th>row, column</th><th>goes to</th></tr><tr><td>0xF8B4</td><td>water</td><td>13, 9</td><td>0xD6D9 -&gt; 0xF39A</td></tr><tr><td>0xF8B5</td><td>wine</td><td>18, 9</td><td>0xD6DA -&gt; 0xF39B</td></tr><tr><td>0xF8B6</td><td>food</td><td>8, 9</td><td>0xD6DD -&gt; 0xF39E</td></tr><tr><td>0xF8B7</td><td>timber</td><td>5, 22</td><td>0xD6DB -&gt; 0xF39C</td></tr><tr><td>0xF8B8</td><td>cloth</td><td>12, 22</td><td>0xD6DC -&gt; 0xF39D</td></tr><tr><td>0xF8B9</td><td>crew</td><td>17, 22</td><td>0xD6DE -&gt; 0xF39F</td></tr><tr><td>0xF8BA</td><td>money</td><td>4, 9</td><td>not handed over</td></tr></table>
+<p>They follow neither the order of the addresses nor the order on screen, and the trip through 0xD6D9 <b>crosses food with timber</b>. A test pins the positions.</p>
+<p>With that table in hand the second half reads itself: 0xF39A and 0xF39B are the drink and are used one after the other -water first, then wine-, 0xF39E is the food and has its own cycle, 0xF39C is the timber that plugs the leak, 0xF39D the cloth that smothers the fire, and 0xF39F how much crew is aboard.</p>
+<h2 id="7-564-bytes-nobody-reads-and-one-stretch-of-them-is-a-snapshot-of-memory">7,564 bytes nobody reads, and one stretch of them is a snapshot of memory</h2>
+<p>The tape records <b>fixed-size</b> blocks no matter what, but the first half&#x27;s program ends at 0x5F9F and the second&#x27;s at 0x5C3F. Whatever was in memory got recorded behind them: <b>7,564 bytes out of 66,016, 11.5%</b>, identified and accounted for but touched by no instruction.</p>
+<p>One of those leftovers can be read in full. From 0xCC56 to 0xD2FF the first half carries <b>1,706 bytes identical to the <code>CARGA</code> file but for a single byte</b> -0xCC56 itself, which is 0x1F there and 0x19 here-. It is the loading screen, still sat in memory when the block was recorded. Nobody reads it: the only routine that would upload it is the one at 0xD330, and that only runs on entry through 0xD302, which had already happened before that block existed.</p>
+<p>The second half, at the same addresses, carries something else: only 4.1% of the bytes match.</p>
+<h2 id="all-three-programs-end-with-a-truncated-copy-of-themselves">All three programs end with a truncated copy of themselves</h2>
+<p>All three end with a stretch of their own code repeated, always cut mid-instruction:</p>
+<table><tr><th>program</th><th>leftover</th><th>copy of</th></tr><tr><td><code>carga</code></td><td>0xD3D8-0xD3DF</td><td>0xD358-0xD35F</td></tr><tr><td>first half</td><td>0x5F9F-0x5FF7</td><td>0x5F1F-0x5F77, 0x80 higher up</td></tr><tr><td>second half</td><td>0x5C42-0x5C79</td><td>0x5BC2-0x5BF9</td></tr></table>
+<p>All three checked byte for byte. Nobody executes them; it looks like a slip of whatever tool the blocks were built with.</p>
+<h2 id="the-publisher-s-signature-carries-a-typo-and-it-is-on-the-tape">The publisher&#x27;s signature carries a typo, and it is on the tape</h2>
+<p>Decoding the name table at 0xD000, down the right margin of the loading screen you read <b>&quot;OMIKRON Softwarwe&quot;</b>, with two w&#x27;s. The typo is on the tape, not in this disassembly, and a test pins it.</p>
+<p><img src="imagenes/carga.png" alt="The loading screen"></p>
+<p>The letters are not ASCII: they are tile indices, and they use <b>two different alphabets inside the same table</b> -0x00-0x19 and 0x20-0x39, two sets of tiles for the same twenty-six letters- plus six tiles (0x3A-0x3F) for the tall two-tile capitals that start &quot;El&quot;, &quot;Descubrimiento&quot; and &quot;America&quot;. The space is 0xFF.</p>
+<h2 id="a-flag-hidden-inside-the-artwork-itself">A flag hidden inside the artwork itself</h2>
+<p>The first half&#x27;s start-up does:</p>
+<pre><code>420A  ld a,(0xC103)
+420D  cp 8
+420F  call nz, voltea_los_patrones</code></pre>
+<p>0xC103 is not a variable: it is a byte <b>of the pattern table</b>, used as a flag so the same artwork is not flipped twice. The routine at 0x561D reverses the bit order of every byte between 0xC102 and 0xC138, which is how the game gets its mirrored artwork without spending any more tape.</p>
+<h2 id="the-music-only-hangs-off-the-interrupt-in-the-first-half">The music only hangs off the interrupt in the first half</h2>
+<p>The first half installs a <code>JP</code> at H.KEYI (0xFD9F) pointing to 0x4046, and the music plays on every scan interrupt, before the BIOS reads the keyboard. The state is fourteen consecutive bytes (0xF8CB-0xF8D8) with <b>three bytes per channel</b>, which is why the cursor at 0x4181 steps by three and the same routine serves all three channels without a single table. There are sixteen tunes indexed at 0xCB95.</p>
+<p>The second half <b>installs nothing</b>: it writes the PSG straight from the main loop, at 0x5213. Checked by searching for writes to 0xFD9A and 0xFD9F across all traced code: there are none.</p>
+<h2 id="screen-7-has-no-name-table-of-its-own">Screen 7 has no name table of its own</h2>
+<p>Screens 0 to 6 of the first half each carry their own table, exactly 0x300 bytes apart, from 0x82F5 to 0x94F5. The seventh does not: it is cut as 32 columns out of a <b>64x24</b> map living at 0x97F5, and the sideways travel is half a screen -the counter at 0xF89D runs from 0 to 0x20-.</p>
+<p><img src="imagenes/p1_fase7.png" alt="The quayside warehouse"></p>
+<h2 id="there-is-not-one-credit-across-the-five-pieces">There is not one credit across the five pieces</h2>
+<p>Sweeping all five for ASCII strings, only three blocks of text come out: the opening (0x8200), the eleven on-screen labels (0xC28A) and the five crossing disasters (0xCBF2). <b>Not a name, not a set of initials, not a build date.</b></p>
+<p>The only name on the whole tape is the publisher&#x27;s, and it is drawn, not written.</p>
+<footer><p><em>El Descubrimiento de America</em> was published by Gema Software / OMK Software for the MSX in 1987, on tape. All rights in the game remain with their holders. This is preservation, study and documentation work, and the tape image is not distributed.</p></footer></div>

@@ -1,0 +1,24 @@
+# Puntos de entrada de la SEGUNDA parte (bloque 05 de la cinta).
+#
+# Cada uno con su justificacion: una semilla puesta a ojo dentro de una zona de
+# datos hace que el desensamblador lea graficos como instrucciones, la cobertura
+# suba y todo parezca ir mejor. Es el error mas caro de esta serie.
+#
+# Aqui NO hay gancho de interrupcion: al reves que la primera parte, esta no
+# instala nada en H.KEYI y el sonido lo escribe con WRTPSG desde el bucle
+# principal (0x5213). Comprobado buscando escrituras a 0xFD9A/0xFD9F en el
+# codigo trazado: no hay ninguna.
+
+0x401F   # arranque. Como en la primera parte, sale de la palabra que el bloque
+         # trae en 0x4002 (aqui 0x401F) y no de una suposicion; el cargador de
+         # 0xD3AD salta ahi con `ld hl,(0x4002) / push hl / ret`.
+
+0x4010   # la misma rutina de servicio que abre la primera parte, byte a byte:
+         # vuelca 16 KB de 0x8000 a la VRAM entera. No la llama nadie, pero es
+         # codigo completo que termina en `jp LDIRVM` y no arrastra al trazador.
+
+0x41DD   # `ld a,1 / ret`, la primera de una escalerilla de seis rutinas de dos
+0x41E0   # bytes (0x41DD, 0x41E0, 0x41E3, 0x41E6, 0x41E9) que devuelven el
+0x41E9   # codigo de terreno. La escalerilla se usa con saltos desde la tabla de
+         # 0x4153, pero solo tres de las cinco reciben un `jp`: las otras dos
+         # quedan sin trazar aunque estan intercaladas entre las que si.

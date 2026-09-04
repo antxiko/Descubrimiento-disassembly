@@ -1,0 +1,123 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>In the emulator — El Descubrimiento de America (Gema/OMK, 1987)</title>
+<style>
+:root{--tinta:#cfd0d4;--suave:#83868f;--fondo:#000;--panel:#0c0e13;--linea:#23262e;
+  --rojo:#ff897d;--cyan:#65dbef;--verde:#3eb849;--oro:#ded087}
+@media (prefers-color-scheme:light){:root{--tinta:#191a1e;--suave:#5a5d66;--fondo:#e9e7e1;
+  --panel:#f7f6f2;--linea:#d0cdc5;--rojo:#b23f34;--cyan:#1c6b7c;--verde:#2b7734;--oro:#8a7420}}
+:root[data-theme="dark"]{--tinta:#cfd0d4;--suave:#83868f;--fondo:#000;--panel:#0c0e13;
+  --linea:#23262e;--rojo:#ff897d;--cyan:#65dbef;--verde:#3eb849;--oro:#ded087}
+:root[data-theme="light"]{--tinta:#191a1e;--suave:#5a5d66;--fondo:#e9e7e1;--panel:#f7f6f2;
+  --linea:#d0cdc5;--rojo:#b23f34;--cyan:#1c6b7c;--verde:#2b7734;--oro:#8a7420}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fondo);color:var(--tinta);padding:0 1.25rem 6rem;
+  font:15px/1.7 ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+.w{max-width:1120px;margin:0 auto}
+.n{max-width:68ch}
+h1,h2,h3,h4{font-weight:400;text-wrap:balance}
+a{color:var(--cyan)}
+img{image-rendering:pixelated;max-width:100%;height:auto;display:block}
+header.top{display:flex;flex-direction:column;align-items:center;gap:1.5rem;
+  padding:4rem 0 2rem;text-align:center}
+header.top img{width:min(100%,642px)}
+.claim{max-width:60ch;color:var(--suave);font-size:1.05rem}
+.claim b{color:var(--tinta);font-weight:400}
+.ficha{display:flex;flex-wrap:wrap;justify-content:center;gap:0 1.5rem;width:100%;
+  font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--suave);
+  border-top:1px solid var(--linea);border-bottom:1px solid var(--linea);padding:.85rem 0}
+.ficha b{color:var(--rojo);font-weight:400}
+nav{display:flex;flex-wrap:wrap;gap:1.25rem;justify-content:center;padding:1.25rem 0;
+  font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+nav a{color:var(--suave);text-decoration:none;border-bottom:1px solid transparent}
+nav a:hover,nav a:focus{color:var(--tinta);border-bottom-color:var(--rojo)}
+nav.docs{border-top:1px solid var(--linea);border-bottom:1px solid var(--linea);
+  margin-bottom:1rem}
+section{margin-top:4.5rem;scroll-margin-top:1rem}
+section>h2{font-size:1rem;letter-spacing:.1em;text-transform:uppercase;
+  border-left:3px solid var(--rojo);padding-left:.9rem;margin:0 0 1.5rem}
+.cifras{display:grid;gap:1px;background:var(--linea);border:1px solid var(--linea);
+  grid-template-columns:repeat(auto-fit,minmax(160px,1fr))}
+.cifra{background:var(--panel);padding:1.1rem}
+.cifra b{display:block;font-size:1.7rem;color:var(--oro);font-weight:400;
+  font-variant-numeric:tabular-nums;line-height:1.2}
+.cifra span{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--suave)}
+.hall{border-top:1px solid var(--linea);padding-top:1.75rem;margin-top:2.5rem}
+.hall:first-of-type{border-top:0;padding-top:0;margin-top:0}
+.hall h3{margin:0 0 .75rem;font-size:1.15rem;color:var(--rojo)}
+.hall h4{color:var(--oro);margin:1.5rem 0 .5rem;font-size:.95rem}
+.hall p{margin:0 0 1rem}
+pre.asm{background:var(--panel);border-left:2px solid var(--verde);margin:1.25rem 0;
+  padding:1rem 1.1rem;overflow-x:auto;font-size:13px;line-height:1.6;color:var(--tinta)}
+.par{display:grid;gap:1.25rem;grid-template-columns:1fr}
+@media(min-width:820px){.par{grid-template-columns:1fr 1fr}}
+.par figure{margin:0}
+table{border-collapse:collapse;width:100%;margin:1.25rem 0;font-size:13px;display:block;
+  overflow-x:auto}
+th,td{text-align:left;padding:.5rem .75rem;border-bottom:1px solid var(--linea)}
+th{color:var(--suave);font-weight:400;font-size:11px;letter-spacing:.07em;text-transform:uppercase}
+td.num{font-variant-numeric:tabular-nums;color:var(--oro)}
+.nivel{margin-top:2rem}
+.nivel h3{margin:0 0 .9rem;font-size:.95rem;letter-spacing:.06em;text-transform:uppercase}
+.nivel em{color:var(--cyan);font-style:normal}
+.sep{color:var(--suave);margin:0 .6rem}
+.rejilla{display:grid;gap:.9rem;grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
+.rejilla figure{margin:0;background:var(--panel);box-shadow:0 0 0 1px var(--linea)}
+.rejilla figcaption{display:flex;justify-content:space-between;padding:.45rem .65rem;
+  font-size:11px;color:var(--suave);border-top:1px solid var(--linea)}
+.dir{font-variant-numeric:tabular-nums;color:var(--verde)}
+footer{margin-top:5rem;padding-top:1.5rem;border-top:1px solid var(--linea);
+  color:var(--suave);font-size:12px}
+
+/* Aviso de trabajo en curso: tiene que verse antes que las cifras, porque un
+   100% mal leido hace mas dano que no ponerlo. */
+.aviso{background:#3a2a10;border-left:3px solid var(--oro);margin:1.5rem auto;
+  padding:1rem 1.2rem;max-width:900px;border-radius:4px}
+.aviso p{margin:0;color:var(--tinta);font-size:15px;line-height:1.65}
+.galeria{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:1.5rem;margin:1.5rem 0}
+.galeria figure{margin:0}
+.galeria img{width:100%;height:auto;image-rendering:pixelated;
+  border:1px solid var(--linea);border-radius:3px}
+.galeria figcaption{color:var(--suave);font-size:13px;margin-top:.5rem}
+audio{display:block;width:100%;max-width:640px;margin:.75rem 0 1.5rem}
+</style>
+<div class="w"><nav class="top"><a href="index.html">Home</a><a href="GETTING-STARTED.html">Start</a><a href="THE-GAME.html">The game</a><a href="THE-CARTRIDGE.html">The tape</a><a href="THE-CODE.html">The code</a><a href="FINDINGS.html">Findings</a><a href="IN-THE-EMULATOR.html" style=color:var(--tinta)>In the emulator</a><a href="OPEN-QUESTIONS.html">Open questions</a><a href="es/EN-EL-EMULADOR.html" style="margin-left:auto;color:var(--oro)">Castellano</a></nav>
+<h1 id="in-the-emulator">In the emulator</h1>
+<p>Reading the binary is not enough. This game has been <b>actually loaded</b> in openMSX, and the RAM and VRAM with the game running have been compared byte for byte with what the listings say.</p>
+<h2 id="how-it-is-done">How it is done</h2>
+<pre><code>make emulador</code></pre>
+<p><code>tools/omsx_carga.tcl</code> and <code>tools/omsx_parte2.tcl</code> load the tape on a <b>Philips VG-8020</b>, which is an MSX1 with real ROM. The real machine is needed: the loader calls the BIOS TAPION and TAPIN, so without ROM there is no load. The scripts leave RAM and VRAM dumps in <code>work/omsx</code>, and <code>tools/coteja.py</code> compares them with the listings.</p>
+<p>It takes a few minutes: 36 and 66 KB of tape at 1200 baud, even emulated at full speed.</p>
+<h2 id="what-comes-out">What comes out</h2>
+<pre><code>OK   0x4000-0x63FF = low part of the block    9216 bytes, 0 different
+OK   0x8000-0xD2FF = high part (45 bytes the game writes over)  21248 bytes
+OK   0xD300-0xD3DF = the loader (2 working bytes)    224 bytes
+OK   and the ones written over are the expected ones   45 addresses
+
+OK   name table, minus the wave band    704 bytes, 0 different
+OK   patterns of the tiles that are visible    0 different
+OK   colours of the tiles that are visible     0 different
+
+OK   0x4000-0x63FF = low part of the block    9216 bytes, 0 different
+OK   0x8000-0xD2FF: what is written over falls in the two work areas  743 bytes
+OK   patterns of the ship font, all three thirds  6144 bytes, 0 different
+OK   the window of the 128x52 map    768 tiles, 0 different
+
+OK: the machine says the same as the disassembly</code></pre>
+<h2 id="what-each-line-proves">What each line proves</h2>
+<p><b>The split of the tape comes out at zero differences</b> across 0x4000-0x63FF, in both halves. Which means the carving up of the headerless block -three sync bytes, 0x2400 low, 0x5300 high- is exactly what the machine does.</p>
+<p>Of the 21,248 bytes of the first half&#x27;s high block, the machine writes over only <b>45</b>, and they are exactly the ones the listing says get written over: 0x915B, a tile the start-up touches up, and 0x9E05-0x9E53, the sprites the routine at 0x4B1E flips in memory to draw the figure facing the other way.</p>
+<p>In the second half the <b>743 bytes written over all fall</b> inside the two declared work areas: the ship&#x27;s record (0xB000) and the copy of the screen (0xB058-0xB357).</p>
+<p><b>Screen 0, built by hand</b> from the tape by repeating the game&#x27;s three upload routines, matches the real VRAM byte for byte across every tile that is visible. That is what settles that the three upload routines — and with them the boundaries of the 103 data blocks — are read correctly.</p>
+<p>And the <b>32x24 window of the ship map matches across all 768 tiles</b> with the cut of the 128x52 map at column 50 and row 16, which are the first two bytes of 0xCBC6. If the width of 128 were wrong, this would come out at hundreds of differences.</p>
+<h2 id="the-differences-that-show-up-and-are-not-errors">The differences that show up and are not errors</h2>
+<p>They are listed one by one inside <code>coteja.py</code> itself, not hidden:</p>
+<ul><li><b>the wave band on rows 18 and 19</b>, which is animated and therefore matches no still frame;</li><li><b>tiles 199 onwards of the third third</b>, which are the text band: it is painted with the BASIC ROM font, which does not come on the tape;</li><li><b>the sprites</b>, which the game flips in memory depending on which way the figure is looking.</li></ul>
+<h2 id="how-to-reach-the-second-half">How to reach the second half</h2>
+<p>The second half cannot be reached without playing the first all the way through. To dump it, <code>omsx_parte2.tcl</code> forces the jump the game itself makes on finishing:</p>
+<pre><code>ld hl,(0xD300) / push hl / ret</code></pre>
+<p>which is what hands control back to the loader so it asks for the next block.</p>
+<h2 id="what-this-does-not-prove">What this does NOT prove</h2>
+<p>That a full game has been played. <b>It has not.</b> The screen names come from looking at the artwork, and the mechanics -what each object does, how you move between screens, what each setback counts- come from reading the code. Playing it properly would probably correct one or two. That is said in <a href="OPEN-QUESTIONS.html">Open questions</a> too.</p>
+<footer><p><em>El Descubrimiento de America</em> was published by Gema Software / OMK Software for the MSX in 1987, on tape. All rights in the game remain with their holders. This is preservation, study and documentation work, and the tape image is not distributed.</p></footer></div>

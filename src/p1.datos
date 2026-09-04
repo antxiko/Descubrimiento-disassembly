@@ -1,0 +1,11 @@
+# Zonas de la PRIMERA parte que el trazador tiene prohibido pisar, aparte de
+# las comunes de src/comun.nocode (ini fin, extremo derecho EXCLUSIVO).
+#
+# ESTA VACIO A PROPOSITO, y eso dice algo: el trazado de esta parte no se
+# descarrila. Los siete puntos de entrada de src/p1.entries alcanzan 8079 bytes
+# seguidos, de 0x4010 a 0x5F9E, sin meterse ni una sola vez en los datos de
+# 0x8000 arriba -que son 21 KB de graficos-, y sin un solo salto indirecto que
+# resolver: el trazador informa de CERO puntos ciegos.
+#
+# Si alguna vez hubiera que anadir algo aqui, seria senal de que una semilla
+# nueva esta metiendo al trazador donde no debe.

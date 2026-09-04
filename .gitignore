@@ -1,0 +1,20 @@
+# La imagen de cinta NO se distribuye: solo el trabajo de documentacion.
+descubrimiento.cas
+*.cas
+*.rom
+*.dsk
+*.wav
+
+# Todo lo que sale de `make` y se puede rehacer
+work/
+extracted/
+
+# Documento de trabajo: lo que cuenta ya esta en docs/, y ahi si se mantiene.
+ESTADO.md
+
+# Basura del sistema y del entorno
+.DS_Store
+__pycache__/
+*.pyc
+.pytest_cache/
+.forja/

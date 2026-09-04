@@ -1,0 +1,112 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Open questions — El Descubrimiento de America (Gema/OMK, 1987)</title>
+<style>
+:root{--tinta:#cfd0d4;--suave:#83868f;--fondo:#000;--panel:#0c0e13;--linea:#23262e;
+  --rojo:#ff897d;--cyan:#65dbef;--verde:#3eb849;--oro:#ded087}
+@media (prefers-color-scheme:light){:root{--tinta:#191a1e;--suave:#5a5d66;--fondo:#e9e7e1;
+  --panel:#f7f6f2;--linea:#d0cdc5;--rojo:#b23f34;--cyan:#1c6b7c;--verde:#2b7734;--oro:#8a7420}}
+:root[data-theme="dark"]{--tinta:#cfd0d4;--suave:#83868f;--fondo:#000;--panel:#0c0e13;
+  --linea:#23262e;--rojo:#ff897d;--cyan:#65dbef;--verde:#3eb849;--oro:#ded087}
+:root[data-theme="light"]{--tinta:#191a1e;--suave:#5a5d66;--fondo:#e9e7e1;--panel:#f7f6f2;
+  --linea:#d0cdc5;--rojo:#b23f34;--cyan:#1c6b7c;--verde:#2b7734;--oro:#8a7420}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fondo);color:var(--tinta);padding:0 1.25rem 6rem;
+  font:15px/1.7 ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+.w{max-width:1120px;margin:0 auto}
+.n{max-width:68ch}
+h1,h2,h3,h4{font-weight:400;text-wrap:balance}
+a{color:var(--cyan)}
+img{image-rendering:pixelated;max-width:100%;height:auto;display:block}
+header.top{display:flex;flex-direction:column;align-items:center;gap:1.5rem;
+  padding:4rem 0 2rem;text-align:center}
+header.top img{width:min(100%,642px)}
+.claim{max-width:60ch;color:var(--suave);font-size:1.05rem}
+.claim b{color:var(--tinta);font-weight:400}
+.ficha{display:flex;flex-wrap:wrap;justify-content:center;gap:0 1.5rem;width:100%;
+  font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--suave);
+  border-top:1px solid var(--linea);border-bottom:1px solid var(--linea);padding:.85rem 0}
+.ficha b{color:var(--rojo);font-weight:400}
+nav{display:flex;flex-wrap:wrap;gap:1.25rem;justify-content:center;padding:1.25rem 0;
+  font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+nav a{color:var(--suave);text-decoration:none;border-bottom:1px solid transparent}
+nav a:hover,nav a:focus{color:var(--tinta);border-bottom-color:var(--rojo)}
+nav.docs{border-top:1px solid var(--linea);border-bottom:1px solid var(--linea);
+  margin-bottom:1rem}
+section{margin-top:4.5rem;scroll-margin-top:1rem}
+section>h2{font-size:1rem;letter-spacing:.1em;text-transform:uppercase;
+  border-left:3px solid var(--rojo);padding-left:.9rem;margin:0 0 1.5rem}
+.cifras{display:grid;gap:1px;background:var(--linea);border:1px solid var(--linea);
+  grid-template-columns:repeat(auto-fit,minmax(160px,1fr))}
+.cifra{background:var(--panel);padding:1.1rem}
+.cifra b{display:block;font-size:1.7rem;color:var(--oro);font-weight:400;
+  font-variant-numeric:tabular-nums;line-height:1.2}
+.cifra span{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--suave)}
+.hall{border-top:1px solid var(--linea);padding-top:1.75rem;margin-top:2.5rem}
+.hall:first-of-type{border-top:0;padding-top:0;margin-top:0}
+.hall h3{margin:0 0 .75rem;font-size:1.15rem;color:var(--rojo)}
+.hall h4{color:var(--oro);margin:1.5rem 0 .5rem;font-size:.95rem}
+.hall p{margin:0 0 1rem}
+pre.asm{background:var(--panel);border-left:2px solid var(--verde);margin:1.25rem 0;
+  padding:1rem 1.1rem;overflow-x:auto;font-size:13px;line-height:1.6;color:var(--tinta)}
+.par{display:grid;gap:1.25rem;grid-template-columns:1fr}
+@media(min-width:820px){.par{grid-template-columns:1fr 1fr}}
+.par figure{margin:0}
+table{border-collapse:collapse;width:100%;margin:1.25rem 0;font-size:13px;display:block;
+  overflow-x:auto}
+th,td{text-align:left;padding:.5rem .75rem;border-bottom:1px solid var(--linea)}
+th{color:var(--suave);font-weight:400;font-size:11px;letter-spacing:.07em;text-transform:uppercase}
+td.num{font-variant-numeric:tabular-nums;color:var(--oro)}
+.nivel{margin-top:2rem}
+.nivel h3{margin:0 0 .9rem;font-size:.95rem;letter-spacing:.06em;text-transform:uppercase}
+.nivel em{color:var(--cyan);font-style:normal}
+.sep{color:var(--suave);margin:0 .6rem}
+.rejilla{display:grid;gap:.9rem;grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
+.rejilla figure{margin:0;background:var(--panel);box-shadow:0 0 0 1px var(--linea)}
+.rejilla figcaption{display:flex;justify-content:space-between;padding:.45rem .65rem;
+  font-size:11px;color:var(--suave);border-top:1px solid var(--linea)}
+.dir{font-variant-numeric:tabular-nums;color:var(--verde)}
+footer{margin-top:5rem;padding-top:1.5rem;border-top:1px solid var(--linea);
+  color:var(--suave);font-size:12px}
+
+/* Aviso de trabajo en curso: tiene que verse antes que las cifras, porque un
+   100% mal leido hace mas dano que no ponerlo. */
+.aviso{background:#3a2a10;border-left:3px solid var(--oro);margin:1.5rem auto;
+  padding:1rem 1.2rem;max-width:900px;border-radius:4px}
+.aviso p{margin:0;color:var(--tinta);font-size:15px;line-height:1.65}
+.galeria{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:1.5rem;margin:1.5rem 0}
+.galeria figure{margin:0}
+.galeria img{width:100%;height:auto;image-rendering:pixelated;
+  border:1px solid var(--linea);border-radius:3px}
+.galeria figcaption{color:var(--suave);font-size:13px;margin-top:.5rem}
+audio{display:block;width:100%;max-width:640px;margin:.75rem 0 1.5rem}
+</style>
+<div class="w"><nav class="top"><a href="index.html">Home</a><a href="GETTING-STARTED.html">Start</a><a href="THE-GAME.html">The game</a><a href="THE-CARTRIDGE.html">The tape</a><a href="THE-CODE.html">The code</a><a href="FINDINGS.html">Findings</a><a href="IN-THE-EMULATOR.html">In the emulator</a><a href="OPEN-QUESTIONS.html" style=color:var(--tinta)>Open questions</a><a href="es/PREGUNTAS-ABIERTAS.html" style="margin-left:auto;color:var(--oro)">Castellano</a></nav>
+<h1 id="open-questions">Open questions</h1>
+<p>Every byte of the tape is accounted for and every routine has a name, but that does not mean everything is known. What is still open is set out here, with the measurement that has been made and the one that has not.</p>
+<h2 id="1-what-the-block-fillers-are">1. What the block fillers are</h2>
+<p>There are three, <b>4,534 bytes in total</b>, and no instruction reads them:</p>
+<table><tr><th>listing</th><th>range</th><th>bytes</th></tr><tr><td><code>p1bajo</code></td><td>0x5FF8-0x63FF</td><td>1,032</td></tr><tr><td><code>p2bajo</code></td><td>0x5C7A-0x63FF</td><td>1,926</td></tr><tr><td><code>p2alto</code></td><td>0xCCD8-0xD2FF</td><td>1,576</td></tr></table>
+<h3 id="what-is-known">What is known</h3>
+<p><b>The first half&#x27;s is empty.</b> It repeats <code>00 FF FF FF FF 00 00 00</code> from 0x5FF9 with not a single exception, and its autocorrelation is 100% at every multiple of 8. It does not carry one bit of information.</p>
+<p><b>The second half&#x27;s two do not.</b> They have 39 and 13 distinct values, and a clear structure: eight-byte records in which <b>four end in <code>F</code> and four end in <code>0</code></b>.</p>
+<h3 id="what-has-been-ruled-out-and-with-what-measurement">What has been ruled out, and with what measurement</h3>
+<p><b>It is not a SCREEN 2 colour table</b>, however much it looks like one. Two measurements knock that down:</p>
+<ul><li>The low nibble is 0 or F in <b>100%</b> of the bytes; across this same game&#x27;s colour tables that happens between 0% and 36.5% of the time (<code>colores_comunes</code> 12.5, <code>pantalla_1_colores</code> 0.0, <code>pantalla_4_colores</code> 4.4, <code>fuente_barco_colores</code> 6.3, <code>pantalla_3_colores</code> 36.5). The only table on the tape with this shape is the loading screen&#x27;s, which is ink on white and gives 98.4%.</li><li>And above all, <b>the phase</b>. Sweeping all eight possible offsets, the four-and-four rule holds at 100% starting at 0x5C7A, 0xCCDA and 0x5FFA, and only at 50% at the 8-aligned addresses. In all three fillers the records fall at addresses with <b>remainder 2 when divided by 8</b>. A SCREEN 2 colour table is 8-aligned by construction, base + tile*8.</li></ul>
+<p><b>It is not a picture</b>: drawn at widths 32, 40, 48 and 64 all that comes out is vertical stripes, which is what an eight-byte structure with nothing in two dimensions produces.</p>
+<p><b>It is not a copy of anything on the tape</b>: searching 24-byte windows across the five listings, <code>p2bajo</code>&#x27;s filler does not appear outside itself.</p>
+<p><b>It was not on screen</b>: against the two openMSX VRAM dumps, 16 KB each, there is <b>not one 32-byte match</b>.</p>
+<p><b>It is not what the first half left in memory</b> at those addresses: 27.5% and 4.1% of the bytes match, against a background match between the two programs of 2.3%.</p>
+<h3 id="what-is-left">What is left</h3>
+<p>That the phase is <b>the same across all three fillers</b>, living in unrelated areas of memory, says the three come from the same place and that it is not coincidence. The live lead is that two-byte offset: it points at eight-byte records with a two-byte header in front, or at a buffer that starts two bytes in. What exactly, is not known.</p>
+<h2 id="2-the-sprites-nobody-names">2. The sprites nobody names</h2>
+<p>From 0xA66D to 0xA6BF in the first half there are 0x53 bytes that are <b>still sprite artwork</b> -two more blocks of the 0x30 series the routine at 0x59FB uses, the second one cut in half- but that no instruction names. From 0xA6C0 to 0xAAFC there are 1,085 consecutive zeros, with not one exception.</p>
+<p>It could be an animation that was dropped, or simply reserved room. There is no way to settle it from the binary.</p>
+<h2 id="3-no-full-game-has-been-played">3. No full game has been played</h2>
+<p>The game has been loaded and started in openMSX, and the second half has been reached by forcing the jump to (0xD300), but it has <b>not been played from start to finish</b>.</p>
+<p>What that means: the screen names come from looking at the artwork, and the mechanics -what each object does, how you move between screens, what each setback counts- come from reading the code. Playing it properly would probably correct one or two.</p>
+<h2 id="4-who-programmed-it">4. Who programmed it</h2>
+<p>Across the five pieces on the tape there is <b>not one credit nor a set of initials</b> in ASCII. The only texts are the opening, eleven on-screen labels and five disaster messages. The only name that shows up is the publisher&#x27;s, and it is drawn in tiles, not written: <b>OMIKRON Softwarwe</b>, typo included.</p>
+<p>If anyone knows who signed this game, we would like to hear.</p>
+<footer><p><em>El Descubrimiento de America</em> was published by Gema Software / OMK Software for the MSX in 1987, on tape. All rights in the game remain with their holders. This is preservation, study and documentation work, and the tape image is not distributed.</p></footer></div>

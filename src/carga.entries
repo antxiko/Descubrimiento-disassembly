@@ -1,0 +1,6 @@
+# Puntos de entrada del fichero BIN 'CARGA' (0xC000-0xD3DF).
+#
+# Solo hay uno y no hay que deducirlo: lo dice la propia cabecera del fichero
+# de cinta. cas_parse.py la lee y anota exec=0xD302 (ver work/cas_parse.log).
+# El BASIC de la cinta hace BLOAD "CAS:",R y la BIOS salta ahi.
+0xD302

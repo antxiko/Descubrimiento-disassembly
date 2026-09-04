@@ -1,0 +1,6 @@
+# Zonas de la SEGUNDA parte que el trazador tiene prohibido pisar, aparte de
+# las comunes de src/comun.nocode (ini fin, extremo derecho EXCLUSIVO).
+#
+# Vacio, por lo mismo que el de la primera parte: los cinco puntos de entrada
+# de src/p2.entries alcanzan 7215 bytes seguidos, de 0x4010 a 0x5C3E, sin
+# entrar en los 21 KB de datos de 0x8000 arriba y sin ningun punto ciego.

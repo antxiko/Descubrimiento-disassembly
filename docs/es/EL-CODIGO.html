@@ -1,0 +1,120 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>El codigo — El Descubrimiento de America (Gema/OMK, 1987)</title>
+<style>
+:root{--tinta:#cfd0d4;--suave:#83868f;--fondo:#000;--panel:#0c0e13;--linea:#23262e;
+  --rojo:#ff897d;--cyan:#65dbef;--verde:#3eb849;--oro:#ded087}
+@media (prefers-color-scheme:light){:root{--tinta:#191a1e;--suave:#5a5d66;--fondo:#e9e7e1;
+  --panel:#f7f6f2;--linea:#d0cdc5;--rojo:#b23f34;--cyan:#1c6b7c;--verde:#2b7734;--oro:#8a7420}}
+:root[data-theme="dark"]{--tinta:#cfd0d4;--suave:#83868f;--fondo:#000;--panel:#0c0e13;
+  --linea:#23262e;--rojo:#ff897d;--cyan:#65dbef;--verde:#3eb849;--oro:#ded087}
+:root[data-theme="light"]{--tinta:#191a1e;--suave:#5a5d66;--fondo:#e9e7e1;--panel:#f7f6f2;
+  --linea:#d0cdc5;--rojo:#b23f34;--cyan:#1c6b7c;--verde:#2b7734;--oro:#8a7420}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fondo);color:var(--tinta);padding:0 1.25rem 6rem;
+  font:15px/1.7 ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+.w{max-width:1120px;margin:0 auto}
+.n{max-width:68ch}
+h1,h2,h3,h4{font-weight:400;text-wrap:balance}
+a{color:var(--cyan)}
+img{image-rendering:pixelated;max-width:100%;height:auto;display:block}
+header.top{display:flex;flex-direction:column;align-items:center;gap:1.5rem;
+  padding:4rem 0 2rem;text-align:center}
+header.top img{width:min(100%,642px)}
+.claim{max-width:60ch;color:var(--suave);font-size:1.05rem}
+.claim b{color:var(--tinta);font-weight:400}
+.ficha{display:flex;flex-wrap:wrap;justify-content:center;gap:0 1.5rem;width:100%;
+  font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--suave);
+  border-top:1px solid var(--linea);border-bottom:1px solid var(--linea);padding:.85rem 0}
+.ficha b{color:var(--rojo);font-weight:400}
+nav{display:flex;flex-wrap:wrap;gap:1.25rem;justify-content:center;padding:1.25rem 0;
+  font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+nav a{color:var(--suave);text-decoration:none;border-bottom:1px solid transparent}
+nav a:hover,nav a:focus{color:var(--tinta);border-bottom-color:var(--rojo)}
+nav.docs{border-top:1px solid var(--linea);border-bottom:1px solid var(--linea);
+  margin-bottom:1rem}
+section{margin-top:4.5rem;scroll-margin-top:1rem}
+section>h2{font-size:1rem;letter-spacing:.1em;text-transform:uppercase;
+  border-left:3px solid var(--rojo);padding-left:.9rem;margin:0 0 1.5rem}
+.cifras{display:grid;gap:1px;background:var(--linea);border:1px solid var(--linea);
+  grid-template-columns:repeat(auto-fit,minmax(160px,1fr))}
+.cifra{background:var(--panel);padding:1.1rem}
+.cifra b{display:block;font-size:1.7rem;color:var(--oro);font-weight:400;
+  font-variant-numeric:tabular-nums;line-height:1.2}
+.cifra span{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--suave)}
+.hall{border-top:1px solid var(--linea);padding-top:1.75rem;margin-top:2.5rem}
+.hall:first-of-type{border-top:0;padding-top:0;margin-top:0}
+.hall h3{margin:0 0 .75rem;font-size:1.15rem;color:var(--rojo)}
+.hall h4{color:var(--oro);margin:1.5rem 0 .5rem;font-size:.95rem}
+.hall p{margin:0 0 1rem}
+pre.asm{background:var(--panel);border-left:2px solid var(--verde);margin:1.25rem 0;
+  padding:1rem 1.1rem;overflow-x:auto;font-size:13px;line-height:1.6;color:var(--tinta)}
+.par{display:grid;gap:1.25rem;grid-template-columns:1fr}
+@media(min-width:820px){.par{grid-template-columns:1fr 1fr}}
+.par figure{margin:0}
+table{border-collapse:collapse;width:100%;margin:1.25rem 0;font-size:13px;display:block;
+  overflow-x:auto}
+th,td{text-align:left;padding:.5rem .75rem;border-bottom:1px solid var(--linea)}
+th{color:var(--suave);font-weight:400;font-size:11px;letter-spacing:.07em;text-transform:uppercase}
+td.num{font-variant-numeric:tabular-nums;color:var(--oro)}
+.nivel{margin-top:2rem}
+.nivel h3{margin:0 0 .9rem;font-size:.95rem;letter-spacing:.06em;text-transform:uppercase}
+.nivel em{color:var(--cyan);font-style:normal}
+.sep{color:var(--suave);margin:0 .6rem}
+.rejilla{display:grid;gap:.9rem;grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
+.rejilla figure{margin:0;background:var(--panel);box-shadow:0 0 0 1px var(--linea)}
+.rejilla figcaption{display:flex;justify-content:space-between;padding:.45rem .65rem;
+  font-size:11px;color:var(--suave);border-top:1px solid var(--linea)}
+.dir{font-variant-numeric:tabular-nums;color:var(--verde)}
+footer{margin-top:5rem;padding-top:1.5rem;border-top:1px solid var(--linea);
+  color:var(--suave);font-size:12px}
+
+/* Aviso de trabajo en curso: tiene que verse antes que las cifras, porque un
+   100% mal leido hace mas dano que no ponerlo. */
+.aviso{background:#3a2a10;border-left:3px solid var(--oro);margin:1.5rem auto;
+  padding:1rem 1.2rem;max-width:900px;border-radius:4px}
+.aviso p{margin:0;color:var(--tinta);font-size:15px;line-height:1.65}
+.galeria{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:1.5rem;margin:1.5rem 0}
+.galeria figure{margin:0}
+.galeria img{width:100%;height:auto;image-rendering:pixelated;
+  border:1px solid var(--linea);border-radius:3px}
+.galeria figcaption{color:var(--suave);font-size:13px;margin-top:.5rem}
+audio{display:block;width:100%;max-width:640px;margin:.75rem 0 1.5rem}
+</style>
+<div class="w"><nav class="top"><a href="index.html">Portada</a><a href="EMPEZAR.html">Empezar</a><a href="EL-JUEGO.html">El juego</a><a href="EL-CARTUCHO.html">La cinta</a><a href="EL-CODIGO.html" style=color:var(--tinta)>El código</a><a href="HALLAZGOS.html">Hallazgos</a><a href="EN-EL-EMULADOR.html">En el emulador</a><a href="PREGUNTAS-ABIERTAS.html">Preguntas abiertas</a><a href="../THE-CODE.html" style="margin-left:auto;color:var(--oro)">English</a></nav>
+<h1 id="el-codigo">El codigo</h1>
+<p>15.504 bytes de codigo repartidos en <b>733 rutinas con nombre</b>, y ninguna de ellas por debajo del liston de comentarios. Pero el codigo esta en tres sitios, no en uno, y los tres son independientes.</p>
+<table><tr><th>listado</th><th>instrucciones</th><th>rutinas</th><th>comentado</th></tr><tr><td><code>carga</code></td><td>88</td><td>9</td><td>26,1 %</td></tr><tr><td><code>p1bajo</code></td><td>3.451</td><td>371</td><td>27,2 %</td></tr><tr><td><code>p2bajo</code></td><td>3.126</td><td>353</td><td>26,3 %</td></tr><tr><td><b>total</b></td><td><b>6.665</b></td><td><b>733</b></td><td><b>26,7 %</b></td></tr></table>
+<p>Los dos listados <code>alto</code> no aparecen porque no tienen ni una instruccion.</p>
+<h2 id="el-cargador-88-instrucciones-que-sobreviven-a-todo">El cargador: 88 instrucciones que sobreviven a todo</h2>
+<p><code>carga</code> es el programa mas pequeno y el mas importante. De sus 5.088 bytes solo <b>210 son codigo</b>; el resto son la pantalla de carga y su fuente.</p>
+<p>Su trabajo es el bucle de 0xD369: pone el motor en marcha con TAPION, coge la sincronia, y luego lee <b>byte a byte con TAPIN</b>, sin cabecera y sin BIOS de ficheros, repartiendo lo que llega en 0x4000 y en 0x8000. Al acabar salta al codigo recien cargado.</p>
+<p>Vive en 0xD300-0xD3DF, que es <b>por encima de donde llega cualquier bloque de cinta</b>, y por eso sigue en pie cuando el juego ya esta corriendo. Los dos bytes de 0xD300 no son codigo sino la direccion de ese bucle, y la primera parte los usa para volver:</p>
+<pre><code>5CC2  ld hl,(0xD300)
+5CC5  push hl
+5CC6  ret</code></pre>
+<h2 id="las-tres-rutinas-que-suben-graficos">Las tres rutinas que suben graficos</h2>
+<p>Todo lo que se ve pasa por una de estas tres, y cada una consume la cinta a un ritmo distinto:</p>
+<table><tr><th>rutina</th><th>consume</th><th>que hace</th></tr><tr><td><code>vuelca_patrones</code> (0x4497)</td><td>BC</td><td>sube dibujo, sin tocar el color</td></tr><tr><td><code>vuelca_comprimido</code> (0x44CB)</td><td>BC + BC/8</td><td>sube dibujo y luego <b>un byte de color por baldosa</b>, estirado a sus ocho filas con FILVRM</td></tr><tr><td><code>vuelca_con_color</code> (0x446D)</td><td>2*BC</td><td>sube dibujo y la tabla de color completa</td></tr></table>
+<p>Ese <code>BC/8</code> de la del medio es la compresion de color del juego: en vez de ocho bytes por baldosa, uno. Es tambien lo que permite cerrar los limites de los datos sin ponerlos a ojo -ver <a href="EL-CARTUCHO.html">La cinta</a>-.</p>
+<h2 id="la-musica-va-colgada-del-gancho-de-teclado-y-solo-en-la-primera-parte">La musica va colgada del gancho de teclado, y solo en la primera parte</h2>
+<p>La primera parte instala un <code>JP</code> en H.KEYI (0xFD9F) apuntando a 0x4046: la musica suena en cada interrupcion de barrido, <b>antes de que la BIOS lea el teclado</b>.</p>
+<p>El estado son catorce bytes seguidos, 0xF8CB-0xF8D8, con <b>tres bytes por canal</b> -puntero de partitura y duracion-. Por eso el cursor de 0x4181 avanza de tres en tres y la misma rutina sirve para los tres canales sin una sola tabla. Hay dieciseis melodias indexadas en 0xCB95.</p>
+<p>La segunda parte <b>no instala nada</b>: escribe el PSG directamente desde el bucle principal, en 0x5213. Comprobado buscando escrituras a 0xFD9A y 0xFD9F en todo el codigo trazado: no hay ninguna.</p>
+<h2 id="un-marcador-dentro-de-los-propios-patrones">Un marcador dentro de los propios patrones</h2>
+<p>El arranque de la primera parte hace:</p>
+<pre><code>420A  ld a,(0xC103)
+420D  cp 8
+420F  call nz, voltea_los_patrones</code></pre>
+<p>0xC103 <b>no es una variable</b>: es un byte de la tabla de patrones, usado como marca para no voltear dos veces los mismos dibujos. La rutina de 0x561D invierte el orden de los bits de cada byte entre 0xC102 y 0xC138, que es como el juego consigue el dibujo espejo sin gastar mas cinta.</p>
+<p>El mismo truco esta en los sprites: la rutina de 0x4B1E los voltea <b>en memoria</b> para dibujar al muneco mirando al otro lado. Se ve en la maquina: de los 21.248 bytes del trozo alto de la primera parte, openMSX solo encuentra 45 pisados, y son exactamente esos sprites (0x9E05-0x9E53) mas una baldosa que retoca el arranque (0x915B).</p>
+<h2 id="como-se-dibuja-la-pantalla-ancha">Como se dibuja la pantalla ancha</h2>
+<p>La pantalla 7 de la primera parte y todo el barco de la segunda salen del mismo tipo de bucle: un mapa mas ancho que la pantalla, del que se recorta una ventana.</p>
+<p>Lo que dice cual es el ancho <b>no es una constante en ninguna tabla</b>: es el paso entre filas del propio bucle. En el mapa del barco, el bucle de 0x4285 suma <b>0x80</b> por fila, y eso es lo que fija las 128 baldosas de ancho. Si estuviera mal leido, el cotejo de la ventana contra la VRAM del emulador saldria a cientos de diferencias; sale a <b>cero</b> en las 768 baldosas.</p>
+<h2 id="los-textos-con-la-fuente-prestada-de-la-rom">Los textos, con la fuente prestada de la ROM</h2>
+<p>Hay tres bloques de cadenas, y solo tres:</p>
+<table><tr><th>donde</th><th>que</th></tr><tr><td>0x8200</td><td>la presentacion, nueve lineas ya partidas a diecinueve columnas</td></tr><tr><td>0xC28A</td><td>once rotulos de pantalla</td></tr><tr><td>0xCBF2</td><td>cinco desastres de la travesia, de 22 caracteres y sin terminador</td></tr></table>
+<p>Todos se dibujan con la fuente de la ROM del BASIC (CGTABL, 0x1BBF), copiada baldosa a baldosa a la tabla de patrones: la cinta no gasta un solo byte en un alfabeto para el juego.</p>
+<p>El unico texto que <b>no</b> usa esa fuente es el de la pantalla de carga, que va en baldosas propias y ni siquiera en ASCII. Eso esta contado en <a href="HALLAZGOS.html">Hallazgos</a>.</p>
+<footer><p><em>El Descubrimiento de America</em> lo publico Gema Software / OMK Software para MSX en 1987, en cinta. Todos los derechos sobre el juego siguen siendo de sus titulares. Este trabajo es de preservacion, estudio y documentacion, y la imagen de la cinta no se distribuye.</p></footer></div>

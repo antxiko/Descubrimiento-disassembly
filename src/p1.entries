@@ -1,0 +1,36 @@
+# Puntos de entrada de la PRIMERA parte (bloque 04 de la cinta).
+#
+# Cada uno con su justificacion: una semilla puesta a ojo dentro de una zona de
+# datos hace que el desensamblador lea graficos como instrucciones, la cobertura
+# suba y todo parezca ir mejor. Es el error mas caro de esta serie.
+
+0x4202   # arranque. No se deduce, se lee: es la palabra que el bloque trae en
+         # 0x4002 y el cargador salta ahi con `ld hl,(0x4002) / push hl / ret`
+         # (0xD3AD). Los dos bytes de delante, 0x4000-0x4001, son la firma 'AB'.
+
+0x4046   # manejador de interrupcion. La rutina de 0x4038 escribe 0xC3 en
+         # H.KEYI (0xFD9F) y la direccion 0x4046 en 0xFDA0: el gancho de
+         # teclado de la BIOS pasa a saltar aqui en cada interrupcion. Como el
+         # destino solo aparece en un `ld hl,0x4046`, el trazador no lo ve.
+
+0x4010   # rutina de servicio que vuelca 16 KB de 0x8000 a la VRAM entera.
+         # No la llama nadie en este bloque -y por eso el trazador no llega-,
+         # pero es codigo completo y termina en `jp LDIRVM`, asi que no puede
+         # arrastrar al trazador a ningun sitio. La misma rutina, byte a byte,
+         # abre tambien el bloque de la segunda parte.
+
+0x41ED   # `es_cero(HL)` con su entrada alternativa en 0x41F0. El codigo solo
+         # llama a la de 0x41F0 (desde 0x41C8), asi que la de 0x41ED se queda
+         # sin trazar aunque son la misma rutina: 0x41ED solo pone HL=0xF8D7 y
+         # cae dentro.
+
+0x5CC7   # `jp $`: el cuelgue de seguridad justo detras del salto al cargador de
+         # 0xD369 (0x5CC2). Si la cinta no arrancase, el programa se queda aqui.
+         # Tres bytes que ninguna instruccion alcanza porque el salto de delante
+         # no vuelve.
+
+0x5F7C   # `ld a,(0xF894) / ret`: devuelve la ultima lectura del mando que dejo
+         # la rutina de 0x5F61, justo encima. Cuatro bytes, sin llamadas.
+
+0x5F9B   # lo mismo para el gatillo: `ld a,(0xF8C4) / ret`, hermana de la de
+         # 0x5F80. Tampoco la llama nadie.

@@ -1,0 +1,9 @@
+# Zonas de la imagen de 64 KB que NO trae la cinta, y que por tanto el trazador
+# no debe tocar. Sin esta barrera un solo destino mal deducido mete al trazador
+# en un mar de ceros y lo "traza" entero como NOPs: cobertura falsa.
+#
+# Los rangos van con el extremo derecho EXCLUSIVO, [ini,fin).
+
+0x0000 0x4000   # pagina 0: la ROM del BASIC, que la cinta no toca
+0x6400 0x8000   # entre los dos trozos de la cinta: RAM que nadie carga
+0xD300 0x10000  # el cargador residente (se traza aparte) y la RAM del sistema

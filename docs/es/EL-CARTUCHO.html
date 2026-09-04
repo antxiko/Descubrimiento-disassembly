@@ -1,0 +1,123 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>La cinta — El Descubrimiento de America (Gema/OMK, 1987)</title>
+<style>
+:root{--tinta:#cfd0d4;--suave:#83868f;--fondo:#000;--panel:#0c0e13;--linea:#23262e;
+  --rojo:#ff897d;--cyan:#65dbef;--verde:#3eb849;--oro:#ded087}
+@media (prefers-color-scheme:light){:root{--tinta:#191a1e;--suave:#5a5d66;--fondo:#e9e7e1;
+  --panel:#f7f6f2;--linea:#d0cdc5;--rojo:#b23f34;--cyan:#1c6b7c;--verde:#2b7734;--oro:#8a7420}}
+:root[data-theme="dark"]{--tinta:#cfd0d4;--suave:#83868f;--fondo:#000;--panel:#0c0e13;
+  --linea:#23262e;--rojo:#ff897d;--cyan:#65dbef;--verde:#3eb849;--oro:#ded087}
+:root[data-theme="light"]{--tinta:#191a1e;--suave:#5a5d66;--fondo:#e9e7e1;--panel:#f7f6f2;
+  --linea:#d0cdc5;--rojo:#b23f34;--cyan:#1c6b7c;--verde:#2b7734;--oro:#8a7420}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fondo);color:var(--tinta);padding:0 1.25rem 6rem;
+  font:15px/1.7 ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+.w{max-width:1120px;margin:0 auto}
+.n{max-width:68ch}
+h1,h2,h3,h4{font-weight:400;text-wrap:balance}
+a{color:var(--cyan)}
+img{image-rendering:pixelated;max-width:100%;height:auto;display:block}
+header.top{display:flex;flex-direction:column;align-items:center;gap:1.5rem;
+  padding:4rem 0 2rem;text-align:center}
+header.top img{width:min(100%,642px)}
+.claim{max-width:60ch;color:var(--suave);font-size:1.05rem}
+.claim b{color:var(--tinta);font-weight:400}
+.ficha{display:flex;flex-wrap:wrap;justify-content:center;gap:0 1.5rem;width:100%;
+  font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--suave);
+  border-top:1px solid var(--linea);border-bottom:1px solid var(--linea);padding:.85rem 0}
+.ficha b{color:var(--rojo);font-weight:400}
+nav{display:flex;flex-wrap:wrap;gap:1.25rem;justify-content:center;padding:1.25rem 0;
+  font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+nav a{color:var(--suave);text-decoration:none;border-bottom:1px solid transparent}
+nav a:hover,nav a:focus{color:var(--tinta);border-bottom-color:var(--rojo)}
+nav.docs{border-top:1px solid var(--linea);border-bottom:1px solid var(--linea);
+  margin-bottom:1rem}
+section{margin-top:4.5rem;scroll-margin-top:1rem}
+section>h2{font-size:1rem;letter-spacing:.1em;text-transform:uppercase;
+  border-left:3px solid var(--rojo);padding-left:.9rem;margin:0 0 1.5rem}
+.cifras{display:grid;gap:1px;background:var(--linea);border:1px solid var(--linea);
+  grid-template-columns:repeat(auto-fit,minmax(160px,1fr))}
+.cifra{background:var(--panel);padding:1.1rem}
+.cifra b{display:block;font-size:1.7rem;color:var(--oro);font-weight:400;
+  font-variant-numeric:tabular-nums;line-height:1.2}
+.cifra span{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--suave)}
+.hall{border-top:1px solid var(--linea);padding-top:1.75rem;margin-top:2.5rem}
+.hall:first-of-type{border-top:0;padding-top:0;margin-top:0}
+.hall h3{margin:0 0 .75rem;font-size:1.15rem;color:var(--rojo)}
+.hall h4{color:var(--oro);margin:1.5rem 0 .5rem;font-size:.95rem}
+.hall p{margin:0 0 1rem}
+pre.asm{background:var(--panel);border-left:2px solid var(--verde);margin:1.25rem 0;
+  padding:1rem 1.1rem;overflow-x:auto;font-size:13px;line-height:1.6;color:var(--tinta)}
+.par{display:grid;gap:1.25rem;grid-template-columns:1fr}
+@media(min-width:820px){.par{grid-template-columns:1fr 1fr}}
+.par figure{margin:0}
+table{border-collapse:collapse;width:100%;margin:1.25rem 0;font-size:13px;display:block;
+  overflow-x:auto}
+th,td{text-align:left;padding:.5rem .75rem;border-bottom:1px solid var(--linea)}
+th{color:var(--suave);font-weight:400;font-size:11px;letter-spacing:.07em;text-transform:uppercase}
+td.num{font-variant-numeric:tabular-nums;color:var(--oro)}
+.nivel{margin-top:2rem}
+.nivel h3{margin:0 0 .9rem;font-size:.95rem;letter-spacing:.06em;text-transform:uppercase}
+.nivel em{color:var(--cyan);font-style:normal}
+.sep{color:var(--suave);margin:0 .6rem}
+.rejilla{display:grid;gap:.9rem;grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
+.rejilla figure{margin:0;background:var(--panel);box-shadow:0 0 0 1px var(--linea)}
+.rejilla figcaption{display:flex;justify-content:space-between;padding:.45rem .65rem;
+  font-size:11px;color:var(--suave);border-top:1px solid var(--linea)}
+.dir{font-variant-numeric:tabular-nums;color:var(--verde)}
+footer{margin-top:5rem;padding-top:1.5rem;border-top:1px solid var(--linea);
+  color:var(--suave);font-size:12px}
+
+/* Aviso de trabajo en curso: tiene que verse antes que las cifras, porque un
+   100% mal leido hace mas dano que no ponerlo. */
+.aviso{background:#3a2a10;border-left:3px solid var(--oro);margin:1.5rem auto;
+  padding:1rem 1.2rem;max-width:900px;border-radius:4px}
+.aviso p{margin:0;color:var(--tinta);font-size:15px;line-height:1.65}
+.galeria{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:1.5rem;margin:1.5rem 0}
+.galeria figure{margin:0}
+.galeria img{width:100%;height:auto;image-rendering:pixelated;
+  border:1px solid var(--linea);border-radius:3px}
+.galeria figcaption{color:var(--suave);font-size:13px;margin-top:.5rem}
+audio{display:block;width:100%;max-width:640px;margin:.75rem 0 1.5rem}
+</style>
+<div class="w"><nav class="top"><a href="index.html">Portada</a><a href="EMPEZAR.html">Empezar</a><a href="EL-JUEGO.html">El juego</a><a href="EL-CARTUCHO.html" style=color:var(--tinta)>La cinta</a><a href="EL-CODIGO.html">El código</a><a href="HALLAZGOS.html">Hallazgos</a><a href="EN-EL-EMULADOR.html">En el emulador</a><a href="PREGUNTAS-ABIERTAS.html">Preguntas abiertas</a><a href="../THE-CARTRIDGE.html" style="margin-left:auto;color:var(--oro)">English</a></nav>
+<h1 id="la-cinta">La cinta</h1>
+<p>66.371 bytes, sha256 <code>ac7b7800...</code>. Dentro no hay un programa: hay cuatro ficheros, y dos de ellos son programas enteros que ocupan las mismas direcciones.</p>
+<h2 id="los-cuatro-ficheros">Los cuatro ficheros</h2>
+<p><code>tools/cas_parse.py</code> trocea el <code>.cas</code> por el centinela de ocho bytes y encuentra esto:</p>
+<table><tr><th>#</th><th>tipo</th><th>nombre</th><th>contenido</th></tr><tr><td>00</td><td>ASCII</td><td><code>DSCRMT</code></td><td>256 bytes: una linea de BASIC</td></tr><tr><td>02</td><td>BIN</td><td><code>CARGA </code></td><td>5.088 bytes, 0xC000-0xD3DF, arranca en 0xD302</td></tr><tr><td>04</td><td>sin cabecera</td><td>—</td><td>30.472 bytes: la PRIMERA parte</td></tr><tr><td>05</td><td>sin cabecera</td><td>—</td><td>30.467 bytes: la SEGUNDA parte</td></tr></table>
+<p>El fichero ASCII es literalmente una linea:</p>
+<pre><code>1 CLEAR 0,57107!:POKE 65535!,168:BLOAD &quot;CAS:&quot;,R</code></pre>
+<p><code>CLEAR 0,57107</code> deja HIMEM en 0xDF13, y el <code>POKE 65535,168</code> escribe 0xA8 en el registro de subslot de la pagina 3, cosa que solo tiene efecto en maquinas con el slot expandido.</p>
+<h2 id="los-dos-bloques-grandes-no-los-lee-la-bios">Los dos bloques grandes no los lee la BIOS</h2>
+<p>Los ficheros 04 y 05 <b>no tienen cabecera</b>, asi que <code>BLOAD</code> no sabria que hacer con ellos. Los lee a mano el bucle de 0xD369 del cargador, con TAPION y TAPIN, byte a byte, y los reparte en tres trozos:</p>
+<ul><li>tres bytes de sincronia, <code>03 02 01</code>;</li><li><b>0x2400 bytes (9.216) a 0x4000-0x63FF</b>: el programa;</li><li><b>0x5300 bytes (21.248) a 0x8000-0xD2FF</b>: graficos, pantallas y tablas.</li></ul>
+<p>3 + 9.216 + 21.248 = <b>30.467</b>, que es exactamente el bloque 05. El 04 mide cinco bytes mas, y son relleno de alineacion del <code>.cas</code>, ceros, comprobado.</p>
+<h2 id="el-mapa-de-memoria-que-son-tres">El mapa de memoria, que son tres</h2>
+<pre><code>0x0000-0x3FFF   ROM del BASIC (de ella se saca la fuente, CGTABL 0x1BBF)
+0x4000-0x63FF   el programa de la parte que este cargada
+0x6400-0x7FFF   sin usar por la cinta
+0x8000-0xD2FF   los graficos de la parte que este cargada
+0xD300-0xD3DF   el cargador, que sobrevive a las dos partes
+0xD3E0-0xFFFF   variables del juego y del sistema</code></pre>
+<p>Que <b>ningun bloque de cinta pase de 0xD2FF</b> es lo que hace posible todo el montaje: el cargador se queda vivo en 0xD300-0xD3DF de principio a fin, y por encima de el hay sitio para los seis bytes que las dos mitades se pasan.</p>
+<p>Como el programa se carga en 0x4000, hace falta una maquina con <b>RAM en la pagina 1</b>, es decir 64 KB.</p>
+<h2 id="los-cinco-listados">Los cinco listados</h2>
+<p>De ese reparto salen los cinco listados del proyecto:</p>
+<table><tr><th>listado</th><th>org</th><th>bytes</th><th>codigo</th><th>datos</th></tr><tr><td><code>carga</code></td><td>0xC000</td><td>5.088</td><td>210</td><td>4.878</td></tr><tr><td><code>p1bajo</code></td><td>0x4000</td><td>9.216</td><td>8.079</td><td>1.137</td></tr><tr><td><code>p1alto</code></td><td>0x8000</td><td>21.248</td><td>0</td><td>21.248</td></tr><tr><td><code>p2bajo</code></td><td>0x4000</td><td>9.216</td><td>7.215</td><td>2.001</td></tr><tr><td><code>p2alto</code></td><td>0x8000</td><td>21.248</td><td>0</td><td>21.248</td></tr><tr><td><b>total</b></td><td></td><td><b>66.016</b></td><td><b>15.504</b></td><td><b>50.512</b></td></tr></table>
+<p>Tres cuartas partes de la cinta son datos. Los dos listados <code>alto</code> no tienen ni una instruccion.</p>
+<h2 id="donde-caen-los-limites-de-los-datos">Donde caen los limites de los datos</h2>
+<p>Los 103 rangos de datos declarados <b>no estan puestos a ojo</b>. En la primera parte salen de las tres rutinas de volcado del propio juego, que dicen cuantos bytes de cinta consume cada bloque:</p>
+<table><tr><th>rutina</th><th>consume</th></tr><tr><td><code>vuelca_patrones</code> (0x4497)</td><td>BC bytes</td></tr><tr><td><code>vuelca_comprimido</code> (0x44CB)</td><td>BC de dibujo + BC/8 de color, un byte por baldosa estirado a sus ocho filas con FILVRM</td></tr><tr><td><code>vuelca_con_color</code> (0x446D)</td><td>2*BC</td></tr></table>
+<p>Encadenando esas cuentas, el final de cada bloque cae <b>exactamente</b> en el principio del siguiente, desde 0xAB60 hasta 0xC012, sin un solo hueco. Hay un test que lo comprueba entero.</p>
+<h2 id="lo-que-sobra-al-final-de-cada-bloque">Lo que sobra al final de cada bloque</h2>
+<p>La cinta graba 0x2400 y 0x5300 bytes <b>pase lo que pase</b>, pero el programa de la primera parte acaba en 0x5F9F y el de la segunda en 0x5C3F. Detras se grabo lo que hubiera en memoria.</p>
+<p>En total son <b>7.564 bytes de 66.016 (11,5 %)</b> que estan identificados y contados pero que ninguna instruccion lee. <code>make sin_leer</code> los cuenta desde las propias notas:</p>
+<table><tr><th>listado</th><th>zona</th><th>rango</th><th>bytes</th></tr><tr><td><code>carga</code></td><td>resto de montaje</td><td>D3D8-D3DF</td><td>8</td></tr><tr><td><code>p1bajo</code></td><td>restos de montaje</td><td>5F9F-5FF7</td><td>89</td></tr><tr><td><code>p1bajo</code></td><td>relleno de bloque</td><td>5FF8-63FF</td><td>1.032</td></tr><tr><td><code>p1alto</code></td><td>hueco de sprites</td><td>A66D-AAFC</td><td>1.168</td></tr><tr><td><code>p1alto</code></td><td>cola de colores de la pantalla de carga</td><td>CC56-CFFF</td><td>938</td></tr><tr><td><code>p1alto</code></td><td>copia de la pantalla de carga</td><td>D000-D2FF</td><td>768</td></tr><tr><td><code>p2bajo</code></td><td>restos de montaje</td><td>5C3F-5C79</td><td>59</td></tr><tr><td><code>p2bajo</code></td><td>relleno de bloque</td><td>5C7A-63FF</td><td>1.926</td></tr><tr><td><code>p2alto</code></td><td>relleno de bloque</td><td>CCD8-D2FF</td><td>1.576</td></tr><tr><td></td><td></td><td><b>TOTAL</b></td><td><b>7.564</b></td></tr></table>
+<p>Los tres &quot;restos de montaje&quot; -uno por programa, cargador incluido- son una <b>copia truncada del propio codigo</b>, siempre cortada a media instruccion:</p>
+<table><tr><th>programa</th><th>restos</th><th>copia de</th></tr><tr><td><code>carga</code></td><td>0xD3D8-0xD3DF</td><td>0xD358-0xD35F</td></tr><tr><td>primera parte</td><td>0x5F9F-0x5FF7</td><td>0x5F1F-0x5F77, 0x80 mas arriba</td></tr><tr><td>segunda parte</td><td>0x5C42-0x5C79</td><td>0x5BC2-0x5BF9</td></tr></table>
+<p>Las tres se han comprobado byte a byte. No las ejecuta nadie, y parecen un desliz de la herramienta con la que se montaron los bloques.</p>
+<p>Lo que hay en los rellenos, y lo que no se sabe de ellos, esta en <a href="PREGUNTAS-ABIERTAS.html">Preguntas abiertas</a>.</p>
+<footer><p><em>El Descubrimiento de America</em> lo publico Gema Software / OMK Software para MSX en 1987, en cinta. Todos los derechos sobre el juego siguen siendo de sus titulares. Este trabajo es de preservacion, estudio y documentacion, y la imagen de la cinta no se distribuye.</p></footer></div>
