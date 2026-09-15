@@ -9,7 +9,7 @@ America** (Gema Software / OMK Software, 1987), reproducible byte a byte.
 |---|---|
 | De la cinta explicado | **100 %** — 0 bytes sin asignar, de 66.016 |
 | Reensambla | **byte a byte**, al mismo sha256 |
-| Listados comentados | **26,7 %** — 1.782 comentarios sobre 6.665 instrucciones |
+| Listados comentados | **26,7 %** — 1.781 comentarios sobre 6.665 instrucciones |
 | Rutinas por debajo del liston del 10 % | **0** de 733 |
 
 ## Cinco listados, no uno

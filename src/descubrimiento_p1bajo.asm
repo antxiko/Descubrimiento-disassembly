@@ -412,6 +412,10 @@ L_4218:
 	jr nz,L_4218		;421c
 	ld a,0ffh		;421e   ; 0xF8C6 a 0xFF: asi la primera pantalla cuenta como cambio
 	ld (0f8c6h),a		;4220
+
+; ----------------------------------------------------------------------
+; --- monta las cuatro primeras fichas de objeto ---
+; ----------------------------------------------------------------------
 	ld hl,0c610h		;4223   ; las coordenadas de partida estan en 0xC610, dos por ficha
 	ld (0f87fh),hl		;4226
 	ld hl,0aafdh		;4229   ; y las fichas, a partir de 0xAAFD
@@ -436,6 +440,10 @@ L_422C:
 	ld de,0ab29h		;4246   ; cuatro fichas de once bytes: de 0xAAFD a 0xAB29
 	rst 20h			;4249
 	jp nz,L_422C		;424a
+
+; ----------------------------------------------------------------------
+; --- restaura la esquina del mapa ancho ---
+; ----------------------------------------------------------------------
 	ld hl,097f5h		;424d   ; el mapa ancho vive en 0x97F5...
 	ld (0f87fh),hl		;4250
 	ld hl,0cbd7h		;4253   ; ...y su version intacta, en 0xCBD7
@@ -507,6 +515,10 @@ L_4259:
 	call 00044h		;42c0   ; BIOS ENASCR - Displays the screen | ENASCR
 	ld a,002h		;42c3   ; SCREEN 2
 	call 0005fh		;42c5   ; BIOS CHGMOD - Switches to given screen mode
+
+; ----------------------------------------------------------------------
+; --- la presentacion, rotulo a rotulo ---
+; ----------------------------------------------------------------------
 	ld hl,00118h		;42c8   ; destino en la tabla de patrones
 	ld (0f87fh),hl		;42cb
 	ld a,004h		;42ce   ; color del rotulo
@@ -2321,6 +2333,10 @@ avanza_el_reloj:		; Un paso del reloj de arena de la pantalla 3
 	ld a,001h		;5229
 	ld (0f890h),a		;522b
 	ret			;522e
+
+; ----------------------------------------------------------------------
+; --- el dibujo del reloj, uno de tres ---
+; ----------------------------------------------------------------------
 L_522F:
 	ld a,(0f8a2h)		;522f   ; 0xF8A2 gira de 0 a 3
 	inc a			;5232
@@ -2623,6 +2639,10 @@ mira_el_cofre:		; En la pantalla 4, el cofre de la columna 0x78
 	call sube_paso		;54b6
 	ld a,001h		;54b9
 	ld (0f89ch),a		;54bb
+
+; ----------------------------------------------------------------------
+; --- se retocan seis baldosas de la pantalla 5 ---
+; ----------------------------------------------------------------------
 L_54BE:
 	ld hl,0911ah		;54be   ; 0x911A: la baldosa del cofre en la tabla de nombres
 	ld a,04fh		;54c1
@@ -3609,7 +3629,7 @@ fin_de_la_primera_parte:		; Monta la pantalla de espera y va a por la segunda
 	ld a,(hl)			;5cba
 	ld (0d6deh),a		;5cbb   ; 0xD6DE <- 0xF8B9, los MARINEROS: la tripulacion de la travesia
 	xor a			;5cbe
-	ld (0d6d8h),a		;5cbf   ; el DINERO (0xF8BA) no se pasa: se queda en esta primera parte
+	ld (0d6d8h),a		;5cbf   ; y 0xD6D8, el balanceo, a cero; el DINERO (0xF8BA) no se pasa: se queda en esta primera parte
 	ld hl,(0d300h)		;5cc2   ; (0xD300) vale 0xD369: el bucle del cargador que lee un bloque de cinta
 	push hl			;5cc5   ; se salta metiendolo en la pila
 	ret			;5cc6
@@ -3805,6 +3825,10 @@ anima_el_pajaro:		; En la pantalla 2, el ave que cruza la escena
 	ld de,00638h		;5e13
 	ld bc,00060h		;5e16
 	call vuelca_con_color		;5e19
+
+; ----------------------------------------------------------------------
+; --- pinta el ave en su columna ---
+; ----------------------------------------------------------------------
 L_5E1C:
 	ld a,(0f8bfh)		;5e1c   ; 0xF8BF es la columna por la que va
 	ld e,a			;5e1f

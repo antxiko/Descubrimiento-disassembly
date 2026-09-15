@@ -9,7 +9,7 @@ America** (Gema Software / OMK Software, 1987), reproducible byte for byte.
 |---|---|
 | Of the tape explained | **100%** — 0 bytes unaccounted for, of 66,016 |
 | Reassembles | **byte for byte**, to the same sha256 |
-| Listings commented | **26.7%** — 1,782 comments over 6,665 instructions |
+| Listings commented | **26.7%** — 1,781 comments over 6,665 instructions |
 | Routines below the 10% bar | **0** of 733 |
 
 ## Five listings, not one

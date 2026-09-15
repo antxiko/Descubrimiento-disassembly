@@ -80,7 +80,17 @@ principal:		; Punto de entrada del bloque
 	ld de,0f91fh		;4031
 	call borra_hasta		;4034
 	ld hl,0d6d9h		;4037   ; los seis bytes que dejo la primera parte en 0xD6D9: lo comprado alli
-	ld de,0f39ah		;403a   ; 0xF39F  MARINEROS la tripulacion, y por tanto cuantos hay
+
+; ----------------------------------------------------------------------
+; van a 0xF39A-0xF39F, y ahi se gastan durante la travesia:
+; 0xF39A  AGUA      se bebe primero (0x5A70)
+; 0xF39B  VINO      la reserva de bebida (0x5A7E)
+; 0xF39C  MADERA    tapa la via de agua (0x51F4)
+; 0xF39D  TELA      apaga el fuego y remienda la vela (0x51DE)
+; 0xF39E  COMIDA    se gasta aparte, en su propio ciclo (0x5A94)
+; 0xF39F  MARINEROS la tripulacion, y por tanto cuantos hay
+; ----------------------------------------------------------------------
+	ld de,0f39ah		;403a
 	ld bc,00006h		;403d
 	ldir		;4040
 	ld a,(0f39fh)		;4042   ; 0xF39F es cuantos van a bordo
@@ -115,6 +125,10 @@ L_407F:
 	ld a,002h		;408b   ; SCREEN 2
 	call 0005fh		;408d   ; BIOS CHGMOD - Switches to given screen mode
 	call carga_fuente		;4090   ; primera pintada de la fuente
+
+; ----------------------------------------------------------------------
+; --- el bucle principal de la travesia ---
+; ----------------------------------------------------------------------
 bucle_principal:		; Catorce llamadas por vuelta, y a empezar otra vez
 	call pinta_ventana		;4093   ; la ventana del barco
 	call mueve_a_la_tripulacion		;4096   ; el muñeco

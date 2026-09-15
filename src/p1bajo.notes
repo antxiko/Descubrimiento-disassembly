@@ -190,7 +190,7 @@ C 0x4212 HL: primera variable del juego
 C 0x4215 DE: la ultima
 C 0x4218 --- borra de 0xF87F a 0xF91E ---
 C 0x421E 0xF8C6 a 0xFF: asi la primera pantalla cuenta como cambio
-C 0x4223 --- monta las cuatro primeras fichas de objeto ---
+B 0x4223 --- monta las cuatro primeras fichas de objeto ---
 C 0x4223 las coordenadas de partida estan en 0xC610, dos por ficha
 C 0x4229 y las fichas, a partir de 0xAAFD
 C 0x422C X de la ficha
@@ -199,7 +199,7 @@ C 0x423C el tercer byte, el estado, arranca en 3
 C 0x4240 el cuarto, el fotograma, en 0
 C 0x4242 y los siete restantes se dejan como esten
 C 0x4246 cuatro fichas de once bytes: de 0xAAFD a 0xAB29
-C 0x424D --- restaura la esquina del mapa ancho ---
+B 0x424D --- restaura la esquina del mapa ancho ---
 C 0x424D el mapa ancho vive en 0x97F5...
 C 0x4253 ...y su version intacta, en 0xCBD7
 C 0x4269 0x9874: 0x7F bytes, las dos primeras filas y pico
@@ -209,7 +209,7 @@ C 0x42B4 FORCLR: tinta 1
 C 0x42BB BAKCLR y BDRCLR: fondo y borde en 14
 C 0x42C0 ENASCR
 C 0x42C3 SCREEN 2
-C 0x42C8 --- la presentacion, rotulo a rotulo ---
+B 0x42C8 --- la presentacion, rotulo a rotulo ---
 C 0x42C8 destino en la tabla de patrones
 C 0x42CE color del rotulo
 C 0x42D3 0x0704: cuatro baldosas de ancho por siete de alto
@@ -753,7 +753,7 @@ C 0x5219 al llegar, se le deja con el estado 0
 L 0x521D avanza_el_reloj  Un paso del reloj de arena de la pantalla 3
 C 0x521D 0xF890 cuenta los cuartos ya caidos
 C 0x5224 al tercero se vuelve al primero
-C 0x522F --- el dibujo del reloj, uno de tres ---
+B 0x522F --- el dibujo del reloj, uno de tres ---
 C 0x522F 0xF8A2 gira de 0 a 3
 C 0x523F el 3 se dibuja como el 1
 C 0x5246 tres dibujos de 0x50 bytes, uno por cuarto de reloj
@@ -829,7 +829,7 @@ C 0x549D la columna: 0x78
 C 0x54A5 y la fila: 1
 C 0x54AA se arrastra al muñeco hasta el cofre
 C 0x54AD y se pasa al estado 4
-C 0x54BE --- se retocan seis baldosas de la pantalla 5 ---
+B 0x54BE --- se retocan seis baldosas de la pantalla 5 ---
 C 0x54BE 0x911A: la baldosa del cofre en la tabla de nombres
 C 0x54C4 0x20: una fila
 L 0x54DE arrastra_a_la_derecha  Empuja al muñeco hasta la columna 0x54
@@ -1067,8 +1067,7 @@ C 0x5CAC 0xD6DD, no 0xD6DB: la COMIDA se cruza con la MADERA
 C 0x5CB1 0xD6DB <- 0xF8B7, la MADERA
 C 0x5CB6 0xD6DC <- 0xF8B8, la TELA
 C 0x5CBB 0xD6DE <- 0xF8B9, los MARINEROS: la tripulacion de la travesia
-C 0x5CBF y 0xD6D8, el balanceo, a cero
-C 0x5CBF el DINERO (0xF8BA) no se pasa: se queda en esta primera parte
+C 0x5CBF y 0xD6D8, el balanceo, a cero; el DINERO (0xF8BA) no se pasa: se queda en esta primera parte
 C 0x5CC2 (0xD300) vale 0xD369: el bucle del cargador que lee un bloque de cinta
 C 0x5CC5 se salta metiendolo en la pila
 L 0x5CC7 cuelgue  Si la cinta no arranca, aqui se queda
@@ -1146,7 +1145,7 @@ L 0x5DFE anima_el_pajaro  En la pantalla 2, el ave que cruza la escena
 C 0x5E01 solo en la pantalla 2
 C 0x5E04 la primera vez hay que pintar el fondo
 C 0x5E10 0x60 bytes de dibujo a la baldosa 0xC7
-C 0x5E1C --- pinta el ave en su columna ---
+B 0x5E1C --- pinta el ave en su columna ---
 C 0x5E1C 0xF8BF es la columna por la que va
 C 0x5E22 0x1955: la fila por la que cruza
 C 0x5E26 baldosas 0xCF, 0xD0 y 0xD1 o 0xD2

@@ -46,13 +46,13 @@ C 0x401F la pila, en lo alto de la zona libre
 C 0x4023 las fichas de los barcos, de la copia intacta de 0xCBC6
 C 0x402E borra la zona de variables, de 0xF87F a 0xF91E
 C 0x4037 los seis bytes que dejo la primera parte en 0xD6D9: lo comprado alli
-C 0x403A van a 0xF39A-0xF39F, y ahi se gastan durante la travesia:
-C 0x403A   0xF39A  AGUA      se bebe primero (0x5A70)
-C 0x403A   0xF39B  VINO      la reserva de bebida (0x5A7E)
-C 0x403A   0xF39C  MADERA    tapa la via de agua (0x51F4)
-C 0x403A   0xF39D  TELA      apaga el fuego y remienda la vela (0x51DE)
-C 0x403A   0xF39E  COMIDA    se gasta aparte, en su propio ciclo (0x5A94)
-C 0x403A   0xF39F  MARINEROS la tripulacion, y por tanto cuantos hay
+B 0x403A van a 0xF39A-0xF39F, y ahi se gastan durante la travesia:
+B 0x403A   0xF39A  AGUA      se bebe primero (0x5A70)
+B 0x403A   0xF39B  VINO      la reserva de bebida (0x5A7E)
+B 0x403A   0xF39C  MADERA    tapa la via de agua (0x51F4)
+B 0x403A   0xF39D  TELA      apaga el fuego y remienda la vela (0x51DE)
+B 0x403A   0xF39E  COMIDA    se gasta aparte, en su propio ciclo (0x5A94)
+B 0x403A   0xF39F  MARINEROS la tripulacion, y por tanto cuantos hay
 C 0x4042 0xF39F es cuantos van a bordo
 C 0x4045 con menos de cinco, la moral empieza tocada
 C 0x404A 0xF8D5: dos tramos de moral perdidos de salida
@@ -71,7 +71,7 @@ C 0x407F y se pinta la ventana
 C 0x4082 0xF8CE: el color del cielo de salida
 C 0x4087 0xF8D0: la fuente de dia
 C 0x408B SCREEN 2
-C 0x4093 --- el bucle principal de la travesia ---
+B 0x4093 --- el bucle principal de la travesia ---
 C 0x4090 primera pintada de la fuente
 L 0x4093 bucle_principal  Catorce llamadas por vuelta, y a empezar otra vez
 C 0x4093 la ventana del barco
